@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riccardo Marega — Quantum ML Researcher</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050810;
+    --bg2: #080d1a;
+    --cyan: #00e5ff;
+    --cyan-dim: rgba(0,229,255,0.15);
+    --cyan-glow: rgba(0,229,255,0.4);
+    --violet: #7b2fff;
+    --violet-dim: rgba(123,47,255,0.15);
+    --white: #eef4ff;
+    --muted: #5a6a8a;
+    --card: rgba(255,255,255,0.03);
+    --border: rgba(0,229,255,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  #cursor {
+    position: fixed; width: 12px; height: 12px;
+    background: var(--cyan); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s, background .2s;
+    mix-blend-mode: screen;
+  }
+  #cursor-ring {
+    position: fixed; width: 36px; height: 36px;
+    border: 1px solid var(--cyan); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%,-50%);
+    transition: all .08s linear;
+    opacity: 0.5;
+  }
+  body:hover #cursor { opacity: 1; }
+
+  /* CANVAS */
+  #bg-canvas {
+    position: fixed; inset: 0;
+    z-index: 0; opacity: 0.55;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.4rem 4rem;
+    backdrop-filter: blur(12px);
+    background: rgba(5,8,16,0.6);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--cyan);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .25s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 1px; background: var(--cyan);
+    transition: width .25s;
+  }
+  .nav-links a:hover { color: var(--cyan); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* SECTIONS */
+  section { position: relative; z-index: 10; }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 0 4rem;
+    padding-top: 80px;
+  }
+  .hero-inner {
+    max-width: 900px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 1s 0.3s forwards;
+  }
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-tag::before {
+    content: ''; display: block;
+    width: 40px; height: 1px;
+    background: var(--cyan);
+  }
+  h1 {
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+  h1 .dim { color: var(--muted); font-weight: 400; }
+  h1 .accent { color: var(--cyan); }
+  .hero-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: rgba(238,244,255,0.55);
+    max-width: 560px;
+    margin-bottom: 3rem;
+  }
+  .hero-ctas { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.85rem 2rem;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: all .25s;
+    display: inline-block;
+    cursor: none;
+  }
+  .btn-primary {
+    background: var(--cyan);
+    color: var(--bg);
+    border: 1px solid var(--cyan);
+  }
+  .btn-primary:hover {
+    background: transparent;
+    color: var(--cyan);
+    box-shadow: 0 0 30px var(--cyan-glow);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--white);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+
+  .hero-scroll {
+    position: absolute; bottom: 3rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted);
+    animation: bounce 2s infinite;
+  }
+  .hero-scroll span { width: 1px; height: 48px; background: var(--border); }
+
+  /* ABOUT */
+  #about {
+    padding: 7rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+    border-top: 1px solid var(--border);
+  }
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.3em; color: var(--cyan);
+    text-transform: uppercase; margin-bottom: 2rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .section-label::before {
+    content: ''; display: block; width: 28px; height: 1px; background: var(--cyan);
+  }
+  h2 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.02em; margin-bottom: 1.5rem;
+  }
+  .about-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem; line-height: 2;
+    color: rgba(238,244,255,0.55);
+  }
+  .about-text p + p { margin-top: 1.2rem; }
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 4px;
+    position: relative; overflow: hidden;
+    transition: border-color .3s, transform .3s;
+  }
+  .stat-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-3px);
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--cyan-dim);
+    opacity: 0; transition: opacity .3s;
+  }
+  .stat-card:hover::before { opacity: 1; }
+  .stat-num {
+    font-size: 2.2rem; font-weight: 800;
+    color: var(--cyan); line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.1em;
+    color: var(--muted); margin-top: 0.4rem;
+    text-transform: uppercase;
+  }
+
+  /* RESEARCH */
+  #research {
+    padding: 7rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .research-header { margin-bottom: 4rem; }
+  .research-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .r-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2.5rem;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .3s, transform .3s;
+  }
+  .r-card:hover {
+    border-color: var(--cyan);
+    transform: translateY(-4px);
+  }
+  .r-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .4s;
+  }
+  .r-card:hover::after { transform: scaleX(1); }
+  .r-icon {
+    font-size: 1.8rem; margin-bottom: 1.5rem;
+  }
+  .r-title {
+    font-size: 1.1rem; font-weight: 700;
+    margin-bottom: 0.8rem; line-height: 1.3;
+  }
+  .r-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem; line-height: 1.8;
+    color: rgba(238,244,255,0.5);
+  }
+
+  /* EXPERIENCE */
+  #experience {
+    padding: 7rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .exp-header { margin-bottom: 4rem; }
+  .timeline {
+    display: flex; flex-direction: column; gap: 0;
+    max-width: 800px;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 1px; background: var(--border);
+  }
+  .tl-item {
+    padding-left: 3rem;
+    padding-bottom: 3.5rem;
+    position: relative;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity .5s, transform .5s;
+  }
+  .tl-item.visible { opacity: 1; transform: translateX(0); }
+  .tl-dot {
+    position: absolute; left: -5px; top: 6px;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--cyan);
+    box-shadow: 0 0 12px var(--cyan-glow);
+  }
+  .tl-date {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.15em;
+    color: var(--cyan); text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .tl-company {
+    font-size: 1.15rem; font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+  .tl-role {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem; color: var(--muted);
+    margin-bottom: 0.75rem; letter-spacing: 0.05em;
+  }
+  .tl-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem; line-height: 1.85;
+    color: rgba(238,244,255,0.5);
+  }
+
+  /* SKILLS */
+  #skills {
+    padding: 7rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .skills-layout {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; margin-top: 4rem;
+  }
+  .skill-group-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.2em;
+    color: var(--cyan); text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .skill-bars { display: flex; flex-direction: column; gap: 1.2rem; }
+  .skill-row {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 1.5rem;
+  }
+  .skill-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem; color: var(--white);
+    min-width: 90px;
+  }
+  .skill-bar-track {
+    flex: 1; height: 3px;
+    background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .skill-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    border-radius: 2px;
+    width: 0;
+    transition: width 1.2s cubic-bezier(.16,1,.3,1);
+  }
+  .tags-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.08em;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 2px; color: var(--muted);
+    transition: all .25s;
+  }
+  .tag:hover {
+    border-color: var(--cyan); color: var(--cyan);
+    background: var(--cyan-dim);
+  }
+
+  /* CONTACT */
+  #contact {
+    padding: 7rem 4rem;
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6rem; align-items: center;
+  }
+  .contact-links { display: flex; flex-direction: column; gap: 1.2rem; margin-top: 3rem; }
+  .contact-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted); text-decoration: none;
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: all .3s;
+  }
+  .contact-link:hover {
+    border-color: var(--cyan); color: var(--cyan);
+    background: var(--cyan-dim);
+    transform: translateX(8px);
+  }
+  .contact-link .cl-icon { font-size: 1rem; }
+  .contact-big {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800; line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .contact-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem; line-height: 1.9;
+    color: rgba(238,244,255,0.45);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .7s, transform .7s;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 2rem; }
+    .nav-links { display: none; }
+    #hero, #about, #research, #experience, #skills, #contact, footer { padding-left: 1.8rem; padding-right: 1.8rem; }
+    #about, #contact { grid-template-columns: 1fr; gap: 3rem; }
+    .research-grid { grid-template-columns: 1fr; }
+    .skills-layout { grid-template-columns: 1fr; gap: 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <a href="#hero" class="nav-logo">RM // Quantum</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Quantum ML Researcher & Developer</div>
+    <h1>
+      <span class="dim">Riccardo</span><br>
+      <span class="accent">Marega</span>
+    </h1>
+    <p class="hero-desc">
+      Bridging physics, computer science and quantum hardware.<br>
+      R&D at IBM Italy · QCNNs · Variational Algorithms · Photonic Interfaces.
+    </p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn btn-primary">Get in touch</a>
+      <a href="#experience" class="btn btn-ghost">View experience</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span></span>
+    scroll
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="reveal">
+    <div class="section-label">About</div>
+    <h2>Physics meets<br>quantum computation.</h2>
+    <div class="about-text">
+      <p>I'm a physicist and software developer working at the intersection of quantum machine learning, variational algorithms and photonic hardware — currently a Research Project Student at IBM Italy.</p>
+      <p>My work spans from theoretical exploration to concrete implementation: building QCNNs, simulating molecular systems with VQE, and crafting interfaces that bridge low-level quantum hardware with intuitive software layers.</p>
+      <p>Based in Milan, Italy. Always seeking the point where physics equations become running code.</p>
+    </div>
+  </div>
+  <div class="reveal" style="transition-delay: .15s">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">97</div>
+        <div class="stat-label">Bachelor grade / 110</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3+</div>
+        <div class="stat-label">Years in R&D</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">IBM</div>
+        <div class="stat-label">Current employer</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">C1</div>
+        <div class="stat-label">English level</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH -->
+<section id="research">
+  <div class="research-header reveal">
+    <div class="section-label">Research</div>
+    <h2>Core areas of<br>expertise.</h2>
+  </div>
+  <div class="research-grid">
+    <div class="r-card reveal">
+      <div class="r-icon">⬡</div>
+      <div class="r-title">Quantum Convolutional Neural Networks</div>
+      <div class="r-desc">Developing and enhancing QCNN architectures at IBM Italy. Exploring novel performance improvement strategies and QML application domains.</div>
+    </div>
+    <div class="r-card reveal" style="transition-delay:.1s">
+      <div class="r-icon">∿</div>
+      <div class="r-title">Variational Quantum Eigensolver</div>
+      <div class="r-desc">Simulated molecular systems via VQE with pulse-based ansätze. Thesis research at Università degli Studi di Milano-Bicocca under Prof. A. Giachero.</div>
+    </div>
+    <div class="r-card reveal" style="transition-delay:.2s">
+      <div class="r-icon">⟳</div>
+      <div class="r-title">Quantum Random Walks</div>
+      <div class="r-desc">Theoretical study at ROTONIUM; produced research-level lecture notes for internal training and algorithmic dissemination.</div>
+    </div>
+    <div class="r-card reveal" style="transition-delay:.3s">
+      <div class="r-icon">◈</div>
+      <div class="r-title">Photonic Quantum Computing</div>
+      <div class="r-desc">Built a front-end interface for a photonic quantum processor, abstracting low-level hardware control for intuitive researcher interaction.</div>
+    </div>
+    <div class="r-card reveal" style="transition-delay:.4s">
+      <div class="r-icon">⚛</div>
+      <div class="r-title">Quantum Machine Learning</div>
+      <div class="r-desc">Master's thesis benchmarking advanced CNN architectures with in-depth exploration of quantum computation at Università Ca' Foscari, Venice.</div>
+    </div>
+    <div class="r-card reveal" style="transition-delay:.5s">
+      <div class="r-icon">⟨ψ|</div>
+      <div class="r-title">Hardware–Software Integration</div>
+      <div class="r-desc">Bridging the gap between quantum hardware and software layers — from photonic processors to variational circuit interfaces.</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="exp-header reveal">
+    <div class="section-label">Experience</div>
+    <h2>A path shaped by<br>curiosity & code.</h2>
+  </div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">Sep 2025 – Present</div>
+      <div class="tl-company">IBM Italy</div>
+      <div class="tl-role">Research Project Student · Milan</div>
+      <div class="tl-desc">Development and enhancement of Quantum Convolutional Neural Networks (QCNNs): exploring performance improvement strategies and QML application domains. Involved in broader R&D initiatives.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">Jan 2026 – Mar 2026</div>
+      <div class="tl-company">ROTONIUM</div>
+      <div class="tl-role">Intern · Padova</div>
+      <div class="tl-desc">Theoretical study of Quantum Random Walks; production of research-level lecture notes for internal training. Developed a front-end interface for a photonic quantum processor, bridging theory, software and hardware.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">Mar 2025 – Oct 2025</div>
+      <div class="tl-company">SI&O</div>
+      <div class="tl-role">Software Developer · San Giuliano Milanese</div>
+      <div class="tl-desc">Designed, developed and tested multi-language applications. Resolved bugs, improved code efficiency and integrated secure solutions within the team.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">Apr 2017 – Jun 2024</div>
+      <div class="tl-company">Italian Red Cross</div>
+      <div class="tl-role">Volunteer · Sesto San Giovanni</div>
+      <div class="tl-desc">Street outreach unit, helpdesk, food deliveries and medical transport. Seven years of consistent service to the community.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-date">Jun 2019 – Jul 2019</div>
+      <div class="tl-company">Medipharm</div>
+      <div class="tl-role">Manager Assistant · Dublin</div>
+      <div class="tl-desc">Assisted daily pharmacy operations; published product listings on the company website.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="reveal">
+    <div class="section-label">Skills</div>
+    <h2>Tools of the trade.</h2>
+  </div>
+  <div class="skills-layout">
+    <div class="reveal" style="transition-delay:.1s">
+      <div class="skill-group-title">Programming languages</div>
+      <div class="skill-bars">
+        <div class="skill-row">
+          <span class="skill-name">Python</span>
+          <div class="skill-bar-track"><div class="skill-bar-fill" data-w="95"></div></div>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">C / C++</span>
+          <div class="skill-bar-track"><div class="skill-bar-fill" data-w="80"></div></div>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">C# / VB</span>
+          <div class="skill-bar-track"><div class="skill-bar-fill" data-w="75"></div></div>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">JS / HTML</span>
+          <div class="skill-bar-track"><div class="skill-bar-fill" data-w="72"></div></div>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">SQL / Git</span>
+          <div class="skill-bar-track"><div class="skill-bar-fill" data-w="70"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal" style="transition-delay:.2s">
+      <div class="skill-group-title">Quantum & Research</div>
+      <div class="tags-grid" id="tags">
+        <span class="tag">QCNNs</span>
+        <span class="tag">VQE</span>
+        <span class="tag">Quantum Random Walks</span>
+        <span class="tag">Variational Algorithms</span>
+        <span class="tag">Photonic Computing</span>
+        <span class="tag">QML</span>
+        <span class="tag">Qiskit</span>
+        <span class="tag">Circuit Simulation</span>
+        <span class="tag">Machine Learning</span>
+        <span class="tag">CNNs</span>
+        <span class="tag">Technical Writing</span>
+        <span class="tag">Team Collaboration</span>
+        <span class="tag">Problem Solving</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="reveal">
+    <div class="section-label">Contact</div>
+    <div class="contact-big">Let's build the<br>quantum future.</div>
+    <p class="contact-sub">Open to R&D collaborations, research opportunities and quantum computing projects. Based in Milan, working remotely worldwide.</p>
+  </div>
+  <div class="reveal" style="transition-delay:.15s">
+    <div class="contact-links">
+      <a href="mailto:maregariccardo.rm0@gmail.com" class="contact-link">
+        <span class="cl-icon">✉</span>
+        maregariccardo.rm0@gmail.com
+      </a>
+      <a href="tel:+393332693600" class="contact-link">
+        <span class="cl-icon">☏</span>
+        +39 333 2693600
+      </a>
+      <a href="https://linkedin.com/in/riccardo-marega" target="_blank" class="contact-link">
+        <span class="cl-icon">in</span>
+        riccardo-marega
+      </a>
+      <a href="https://github.com/RiCkymare00" target="_blank" class="contact-link">
+        <span class="cl-icon">⌥</span>
+        RiCkymare00
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Riccardo Marega</span>
+  <span>Quantum ML · Milano, IT</span>
+</footer>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function tick() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(tick);
+})();
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.width = '6px'; cursor.style.height = '6px'; ring.style.width = '48px'; ring.style.height = '48px'; });
+  el.addEventListener('mouseleave', () => { cursor.style.width = '12px'; cursor.style.height = '12px'; ring.style.width = '36px'; ring.style.height = '36px'; });
+});
+
+// CANVAS QUANTUM PARTICLES
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, nodes = [], lines = [];
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+const N = 55;
+for (let i = 0; i < N; i++) {
+  nodes.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 0.35,
+    vy: (Math.random() - 0.5) * 0.35,
+    r: Math.random() * 1.8 + 0.5,
+    pulse: Math.random() * Math.PI * 2
+  });
+}
+
+function drawCanvas() {
+  ctx.clearRect(0, 0, W, H);
+  const t = Date.now() * 0.001;
+
+  for (let n of nodes) {
+    n.x += n.vx; n.y += n.vy; n.pulse += 0.02;
+    if (n.x < 0 || n.x > W) n.vx *= -1;
+    if (n.y < 0 || n.y > H) n.vy *= -1;
+  }
+
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x;
+      const dy = nodes[i].y - nodes[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 160) {
+        const alpha = (1 - dist / 160) * 0.25;
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.strokeStyle = `rgba(0,229,255,${alpha})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+    }
+  }
+
+  for (let n of nodes) {
+    const glow = 0.5 + 0.5 * Math.sin(n.pulse);
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0,229,255,${0.3 + glow * 0.5})`;
+    ctx.fill();
+    if (n.r > 1.5) {
+      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 6);
+      g.addColorStop(0, `rgba(0,229,255,${0.12 * glow})`);
+      g.addColorStop(1, 'rgba(0,229,255,0)');
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r * 6, 0, Math.PI * 2);
+      ctx.fillStyle = g; ctx.fill();
+    }
+  }
+
+  requestAnimationFrame(drawCanvas);
+}
+drawCanvas();
+
+// SCROLL REVEAL
+const reveals = document.querySelectorAll('.reveal');
+const tl = document.querySelectorAll('.tl-item');
+
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.15 });
+reveals.forEach(r => obs.observe(r));
+tl.forEach(t => obs.observe(t));
+
+// SKILL BARS
+const barObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.skill-bar-fill').forEach(bar => {
+        bar.style.width = bar.dataset.w + '%';
+      });
+      barObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+document.querySelectorAll('.skill-bars').forEach(sb => barObs.observe(sb));
+</script>
+</body>
+</html>
