@@ -4,82 +4,130 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Riccardo Marega — Quantum ML Researcher</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #050810;
-    --bg2: #080d1a;
-    --cyan: #00e5ff;
-    --cyan-dim: rgba(0,229,255,0.15);
-    --cyan-glow: rgba(0,229,255,0.4);
-    --violet: #7b2fff;
-    --violet-dim: rgba(123,47,255,0.15);
-    --white: #eef4ff;
-    --muted: #5a6a8a;
-    --card: rgba(255,255,255,0.03);
-    --border: rgba(0,229,255,0.12);
+    --bg:         #02040a;
+    --bg2:        #040810;
+    --beam:       #00aaff;
+    --beam-dim:   rgba(0,170,255,0.12);
+    --beam-glow:  rgba(0,170,255,0.45);
+    --collision:  #ff8c00;
+    --coll-dim:   rgba(255,140,0,0.12);
+    --coll-glow:  rgba(255,140,0,0.4);
+    --detect:     #00ff88;
+    --detect-dim: rgba(0,255,136,0.1);
+    --white:      #ddeeff;
+    --muted:      #3d5570;
+    --card:       rgba(0,170,255,0.04);
+    --border:     rgba(0,170,255,0.14);
+    --border-hot: rgba(255,140,0,0.35);
+    --grid-line:  rgba(0,170,255,0.04);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html { scroll-behavior: smooth; }
 
   body {
     background: var(--bg);
     color: var(--white);
-    font-family: 'Syne', sans-serif;
+    font-family: 'Rajdhani', sans-serif;
     overflow-x: hidden;
     cursor: none;
   }
 
-  /* CUSTOM CURSOR */
+  /* ── TECH GRID OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  /* ── CUSTOM CURSOR ── */
   #cursor {
-    position: fixed; width: 12px; height: 12px;
-    background: var(--cyan); border-radius: 50%;
+    position: fixed; width: 10px; height: 10px;
+    background: var(--collision);
+    border-radius: 50%;
     pointer-events: none; z-index: 9999;
     transform: translate(-50%,-50%);
-    transition: width .2s, height .2s, background .2s;
+    box-shadow: 0 0 12px var(--coll-glow), 0 0 24px var(--coll-glow);
+    transition: width .15s, height .15s;
     mix-blend-mode: screen;
   }
   #cursor-ring {
-    position: fixed; width: 36px; height: 36px;
-    border: 1px solid var(--cyan); border-radius: 50%;
+    position: fixed; width: 32px; height: 32px;
+    border: 1px solid var(--beam);
+    border-radius: 50%;
     pointer-events: none; z-index: 9998;
     transform: translate(-50%,-50%);
     transition: all .08s linear;
-    opacity: 0.5;
+    opacity: 0.55;
   }
-  body:hover #cursor { opacity: 1; }
+  #cursor-cross-h, #cursor-cross-v {
+    position: fixed; pointer-events: none; z-index: 9997;
+    background: rgba(0,170,255,0.08);
+    transform: translate(-50%,-50%);
+  }
+  #cursor-cross-h { width: 100vw; height: 1px; }
+  #cursor-cross-v { width: 1px; height: 100vh; }
 
-  /* CANVAS */
+  /* ── CANVAS ── */
   #bg-canvas {
     position: fixed; inset: 0;
-    z-index: 0; opacity: 0.55;
+    z-index: 1; opacity: 0.7;
   }
 
-  /* NAV */
+  /* ── NAV ── */
   nav {
     position: fixed; top: 0; left: 0; right: 0;
     z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 1.4rem 4rem;
-    backdrop-filter: blur(12px);
-    background: rgba(5,8,16,0.6);
+    padding: 1.2rem 4rem;
+    backdrop-filter: blur(14px);
+    background: rgba(2,4,10,0.75);
     border-bottom: 1px solid var(--border);
   }
   .nav-logo {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--cyan);
-    letter-spacing: 0.2em;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.72rem;
+    color: var(--beam);
+    letter-spacing: 0.25em;
     text-transform: uppercase;
     text-decoration: none;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .nav-logo-dot {
+    width: 8px; height: 8px;
+    background: var(--collision);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--coll-glow);
+    animation: pulse-dot 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { transform: scale(1); opacity:1; }
+    50% { transform: scale(1.5); opacity:.6; }
+  }
+  .nav-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.15em;
+    color: var(--detect);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .nav-status::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--detect); border-radius: 50%;
+    box-shadow: 0 0 8px var(--detect);
+    animation: pulse-dot 2s infinite;
   }
   .nav-links { display: flex; gap: 2.5rem; list-style: none; }
   .nav-links a {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted);
     text-decoration: none;
@@ -88,382 +136,781 @@
   }
   .nav-links a::after {
     content: ''; position: absolute; bottom: -4px; left: 0;
-    width: 0; height: 1px; background: var(--cyan);
+    width: 0; height: 1px; background: var(--beam);
     transition: width .25s;
   }
-  .nav-links a:hover { color: var(--cyan); }
+  .nav-links a:hover { color: var(--beam); }
   .nav-links a:hover::after { width: 100%; }
 
-  /* SECTIONS */
+  /* ── SECTIONS ── */
   section { position: relative; z-index: 10; }
 
-  /* HERO */
+  /* ── HERO ── */
   #hero {
     min-height: 100vh;
     display: flex; align-items: center;
     padding: 0 4rem;
     padding-top: 80px;
+    position: relative;
+    overflow: hidden;
   }
+
+  /* Accelerator ring decorative SVG in hero */
+  .hero-ring {
+    position: absolute;
+    right: -8vw; top: 50%;
+    transform: translateY(-50%);
+    width: 65vw; height: 65vw;
+    max-width: 750px; max-height: 750px;
+    opacity: 0.18;
+    pointer-events: none;
+  }
+
   .hero-inner {
-    max-width: 900px;
+    max-width: 820px;
     opacity: 0;
-    transform: translateY(30px);
-    animation: fadeUp 1s 0.3s forwards;
+    transform: translateY(28px);
+    animation: fadeUp 1s 0.4s forwards;
+    position: relative; z-index: 2;
   }
   .hero-tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.72rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
     letter-spacing: 0.3em;
-    color: var(--cyan);
+    color: var(--collision);
     text-transform: uppercase;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.8rem;
     display: flex; align-items: center; gap: 0.75rem;
   }
-  .hero-tag::before {
-    content: ''; display: block;
-    width: 40px; height: 1px;
-    background: var(--cyan);
+  .hero-tag-line {
+    width: 40px; height: 1px; background: var(--collision);
+    box-shadow: 0 0 6px var(--coll-glow);
   }
   h1 {
-    font-size: clamp(3.5rem, 8vw, 7rem);
-    font-weight: 800;
-    line-height: 0.95;
-    letter-spacing: -0.02em;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.8rem, 6.5vw, 5.8rem);
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.01em;
     margin-bottom: 1.5rem;
   }
   h1 .dim { color: var(--muted); font-weight: 400; }
-  h1 .accent { color: var(--cyan); }
+  h1 .accent { color: var(--beam); text-shadow: 0 0 30px var(--beam-glow); }
   .hero-desc {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.9rem;
-    line-height: 1.9;
-    color: rgba(238,244,255,0.55);
-    max-width: 560px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 2.0;
+    color: rgba(221,238,255,0.5);
+    max-width: 520px;
     margin-bottom: 3rem;
   }
+  .hero-energy {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    display: flex; gap: 2rem;
+  }
+  .energy-val { color: var(--detect); }
   .hero-ctas { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+
   .btn {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.72rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    padding: 0.85rem 2rem;
-    border-radius: 2px;
+    padding: 0.9rem 2.2rem;
     text-decoration: none;
     transition: all .25s;
     display: inline-block;
     cursor: none;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    transition: all .25s;
   }
   .btn-primary {
-    background: var(--cyan);
+    background: var(--beam);
     color: var(--bg);
-    border: 1px solid var(--cyan);
+    border: none;
   }
   .btn-primary:hover {
     background: transparent;
-    color: var(--cyan);
-    box-shadow: 0 0 30px var(--cyan-glow);
+    color: var(--beam);
+    box-shadow: 0 0 30px var(--beam-glow), inset 0 0 30px var(--beam-dim);
+    outline: 1px solid var(--beam);
+    outline-offset: -1px;
   }
   .btn-ghost {
     background: transparent;
     color: var(--white);
-    border: 1px solid var(--border);
+    outline: 1px solid var(--border);
+    outline-offset: -1px;
   }
   .btn-ghost:hover {
-    border-color: var(--cyan);
-    color: var(--cyan);
+    outline-color: var(--collision);
+    color: var(--collision);
+    box-shadow: 0 0 20px var(--coll-glow);
   }
 
   .hero-scroll {
-    position: absolute; bottom: 3rem; left: 50%;
+    position: absolute; bottom: 2.5rem; left: 50%;
     transform: translateX(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted);
-    animation: bounce 2s infinite;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.22em; color: var(--muted);
+    animation: bounce 2.2s infinite;
+    z-index: 2;
   }
-  .hero-scroll span { width: 1px; height: 48px; background: var(--border); }
+  .hero-scroll-line { width: 1px; height: 44px; background: linear-gradient(to bottom, var(--beam), transparent); }
 
-  /* ABOUT */
+  /* ── BEAM DIVIDER ── */
+  .beam-divider {
+    position: relative; z-index: 10;
+    height: 2px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      var(--beam) 20%,
+      var(--collision) 50%,
+      var(--beam) 80%,
+      transparent 100%
+    );
+    box-shadow: 0 0 12px var(--beam-glow), 0 0 4px var(--coll-glow);
+    overflow: visible;
+  }
+  .beam-divider::before {
+    content: '';
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+    width: 16px; height: 16px;
+    background: var(--collision);
+    border-radius: 50%;
+    box-shadow: 0 0 20px var(--coll-glow), 0 0 40px var(--coll-glow);
+    animation: collision-pulse 2s ease-in-out infinite;
+  }
+  @keyframes collision-pulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); opacity:1; }
+    50% { transform: translate(-50%,-50%) scale(2); opacity:.3; }
+  }
+
+  /* ── ABOUT ── */
   #about {
     padding: 7rem 4rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6rem;
     align-items: start;
-    border-top: 1px solid var(--border);
   }
   .section-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.7rem; letter-spacing: 0.3em; color: var(--cyan);
-    text-transform: uppercase; margin-bottom: 2rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.3em; color: var(--collision);
+    text-transform: uppercase; margin-bottom: 1.8rem;
     display: flex; align-items: center; gap: 0.75rem;
   }
   .section-label::before {
-    content: ''; display: block; width: 28px; height: 1px; background: var(--cyan);
+    content: ''; display: block; width: 28px; height: 1px;
+    background: var(--collision);
+    box-shadow: 0 0 6px var(--coll-glow);
   }
   h2 {
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    font-weight: 800; line-height: 1.1;
-    letter-spacing: -0.02em; margin-bottom: 1.5rem;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    font-weight: 700; line-height: 1.15;
+    letter-spacing: -0.01em; margin-bottom: 1.5rem;
   }
   .about-text {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.82rem; line-height: 2;
-    color: rgba(238,244,255,0.55);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem; line-height: 2;
+    color: rgba(221,238,255,0.5);
   }
   .about-text p + p { margin-top: 1.2rem; }
+
+  /* Detector readout stats */
   .stats-grid {
     display: grid; grid-template-columns: 1fr 1fr;
-    gap: 1.5rem; margin-top: 3rem;
+    gap: 1.2rem; margin-top: 2.5rem;
   }
   .stat-card {
     background: var(--card);
     border: 1px solid var(--border);
-    padding: 1.5rem;
-    border-radius: 4px;
+    padding: 1.4rem 1.4rem 1.2rem;
     position: relative; overflow: hidden;
     transition: border-color .3s, transform .3s;
-  }
-  .stat-card:hover {
-    border-color: var(--cyan);
-    transform: translateY(-3px);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
   }
   .stat-card::before {
     content: '';
-    position: absolute; inset: 0;
-    background: var(--cyan-dim);
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--beam), var(--collision));
     opacity: 0; transition: opacity .3s;
   }
+  .stat-card:hover { border-color: var(--beam); transform: translateY(-3px); }
   .stat-card:hover::before { opacity: 1; }
   .stat-num {
-    font-size: 2.2rem; font-weight: 800;
-    color: var(--cyan); line-height: 1;
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem; font-weight: 700;
+    color: var(--beam); line-height: 1;
+    text-shadow: 0 0 20px var(--beam-glow);
   }
   .stat-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.68rem; letter-spacing: 0.1em;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.63rem; letter-spacing: 0.1em;
     color: var(--muted); margin-top: 0.4rem;
     text-transform: uppercase;
   }
 
-  /* RESEARCH */
+  /* ── RESEARCH ── */
   #research {
     padding: 7rem 4rem;
-    border-top: 1px solid var(--border);
   }
   .research-header { margin-bottom: 4rem; }
   .research-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1.4rem;
   }
   .r-card {
     background: var(--card);
     border: 1px solid var(--border);
-    padding: 2.5rem;
-    border-radius: 4px;
+    padding: 2.2rem;
     position: relative;
     overflow: hidden;
     transition: border-color .3s, transform .3s;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
   }
-  .r-card:hover {
-    border-color: var(--cyan);
-    transform: translateY(-4px);
+  /* Feynman-style diagonal decoration */
+  .r-card::before {
+    content: '';
+    position: absolute; bottom: -30px; right: -30px;
+    width: 80px; height: 80px;
+    border: 1px solid var(--beam-dim);
+    border-radius: 50%;
+    transition: all .4s;
   }
   .r-card::after {
     content: '';
     position: absolute; top: 0; left: 0;
-    width: 100%; height: 2px;
-    background: linear-gradient(90deg, var(--cyan), var(--violet));
-    transform: scaleX(0); transform-origin: left;
-    transition: transform .4s;
+    width: 3px; height: 0;
+    background: linear-gradient(180deg, var(--collision), var(--beam));
+    transition: height .4s;
   }
-  .r-card:hover::after { transform: scaleX(1); }
+  .r-card:hover {
+    border-color: var(--beam);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 40px rgba(0,170,255,0.1);
+  }
+  .r-card:hover::before { width: 120px; height: 120px; border-color: rgba(0,170,255,0.12); }
+  .r-card:hover::after { height: 100%; }
   .r-icon {
-    font-size: 1.8rem; margin-bottom: 1.5rem;
+    font-size: 1.6rem; margin-bottom: 1.4rem;
+    display: block;
+    filter: drop-shadow(0 0 8px var(--beam-glow));
   }
   .r-title {
-    font-size: 1.1rem; font-weight: 700;
-    margin-bottom: 0.8rem; line-height: 1.3;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.05rem; font-weight: 700;
+    margin-bottom: 0.75rem; line-height: 1.3;
+    letter-spacing: 0.02em;
   }
   .r-desc {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem; line-height: 1.8;
-    color: rgba(238,244,255,0.5);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem; line-height: 1.85;
+    color: rgba(221,238,255,0.45);
+  }
+  /* Particle track number */
+  .r-track {
+    position: absolute; top: 1.2rem; right: 1.4rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.1em;
+    color: var(--muted);
   }
 
-  /* EXPERIENCE */
+  /* ── EXPERIENCE ── */
   #experience {
     padding: 7rem 4rem;
-    border-top: 1px solid var(--border);
   }
   .exp-header { margin-bottom: 4rem; }
   .timeline {
-    display: flex; flex-direction: column; gap: 0;
-    max-width: 800px;
+    display: flex; flex-direction: column;
+    max-width: 780px;
     position: relative;
   }
+  /* Beam pipe track */
   .timeline::before {
     content: '';
-    position: absolute; left: 0; top: 0; bottom: 0;
-    width: 1px; background: var(--border);
+    position: absolute; left: 8px; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, var(--beam), var(--collision), var(--beam), transparent);
+    box-shadow: 0 0 8px var(--beam-glow);
   }
   .tl-item {
-    padding-left: 3rem;
-    padding-bottom: 3.5rem;
+    padding-left: 3.5rem;
+    padding-bottom: 3rem;
     position: relative;
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-18px);
     transition: opacity .5s, transform .5s;
   }
   .tl-item.visible { opacity: 1; transform: translateX(0); }
+  /* Detector vertex */
   .tl-dot {
-    position: absolute; left: -5px; top: 6px;
-    width: 11px; height: 11px;
+    position: absolute; left: 0; top: 4px;
+    width: 17px; height: 17px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tl-dot::before {
+    content: '';
+    width: 9px; height: 9px;
     border-radius: 50%;
-    background: var(--bg);
-    border: 2px solid var(--cyan);
-    box-shadow: 0 0 12px var(--cyan-glow);
+    background: var(--collision);
+    box-shadow: 0 0 10px var(--coll-glow), 0 0 20px var(--coll-glow);
+  }
+  .tl-dot::after {
+    content: '';
+    position: absolute; inset: 0;
+    border: 1px solid rgba(255,140,0,0.35);
+    border-radius: 50%;
+    animation: vertex-pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes vertex-pulse {
+    0%,100% { transform: scale(1); opacity:.35; }
+    50% { transform: scale(1.8); opacity:0; }
   }
   .tl-date {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.68rem; letter-spacing: 0.15em;
-    color: var(--cyan); text-transform: uppercase;
-    margin-bottom: 0.5rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    color: var(--collision); text-transform: uppercase;
+    margin-bottom: 0.4rem;
   }
   .tl-company {
-    font-size: 1.15rem; font-weight: 700;
-    margin-bottom: 0.2rem;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem; font-weight: 600;
+    margin-bottom: 0.2rem; letter-spacing: 0.02em;
   }
   .tl-role {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; color: var(--muted);
     margin-bottom: 0.75rem; letter-spacing: 0.05em;
   }
   .tl-desc {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem; line-height: 1.85;
-    color: rgba(238,244,255,0.5);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem; line-height: 1.9;
+    color: rgba(221,238,255,0.45);
   }
 
-  /* SKILLS */
+  /* ── SKILLS ── */
   #skills {
     padding: 7rem 4rem;
-    border-top: 1px solid var(--border);
   }
   .skills-layout {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 5rem; margin-top: 4rem;
   }
   .skill-group-title {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.68rem; letter-spacing: 0.2em;
-    color: var(--cyan); text-transform: uppercase;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.22em;
+    color: var(--beam); text-transform: uppercase;
     margin-bottom: 2rem;
   }
-  .skill-bars { display: flex; flex-direction: column; gap: 1.2rem; }
+  .skill-bars { display: flex; flex-direction: column; gap: 1.1rem; }
   .skill-row {
     display: flex; align-items: center;
     justify-content: space-between; gap: 1.5rem;
   }
   .skill-name {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.75rem; color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem; color: var(--white);
     min-width: 90px;
   }
   .skill-bar-track {
     flex: 1; height: 3px;
-    background: var(--border); border-radius: 2px; overflow: hidden;
+    background: var(--border); position: relative; overflow: visible;
   }
   .skill-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--cyan), var(--violet));
-    border-radius: 2px;
+    background: linear-gradient(90deg, var(--beam), var(--collision));
     width: 0;
-    transition: width 1.2s cubic-bezier(.16,1,.3,1);
+    transition: width 1.3s cubic-bezier(.16,1,.3,1);
+    position: relative;
+    box-shadow: 0 0 8px var(--beam-glow);
   }
+  /* particle at end of bar */
+  .skill-bar-fill::after {
+    content: '';
+    position: absolute; right: -4px; top: 50%;
+    transform: translateY(-50%);
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--collision);
+    box-shadow: 0 0 10px var(--coll-glow);
+    opacity: 0;
+    transition: opacity .3s 1.2s;
+  }
+  .skill-bar-fill.lit::after { opacity: 1; }
+
   .tags-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
   .tag {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.68rem; letter-spacing: 0.08em;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.08em;
     padding: 0.4rem 0.85rem;
     border: 1px solid var(--border);
-    border-radius: 2px; color: var(--muted);
+    color: var(--muted);
     transition: all .25s;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
   }
   .tag:hover {
-    border-color: var(--cyan); color: var(--cyan);
-    background: var(--cyan-dim);
+    border-color: var(--beam); color: var(--beam);
+    background: var(--beam-dim);
+    box-shadow: 0 0 10px var(--beam-glow);
   }
 
-  /* CONTACT */
+  /* ── CONTACT ── */
   #contact {
     padding: 7rem 4rem;
-    border-top: 1px solid var(--border);
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 6rem; align-items: center;
   }
-  .contact-links { display: flex; flex-direction: column; gap: 1.2rem; margin-top: 3rem; }
+  .contact-links { display: flex; flex-direction: column; gap: 1rem; margin-top: 3rem; }
   .contact-link {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.78rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
     color: var(--muted); text-decoration: none;
     display: flex; align-items: center; gap: 1rem;
     padding: 1rem 1.5rem;
     border: 1px solid var(--border);
-    border-radius: 2px;
     transition: all .3s;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
   }
   .contact-link:hover {
-    border-color: var(--cyan); color: var(--cyan);
-    background: var(--cyan-dim);
-    transform: translateX(8px);
+    border-color: var(--beam); color: var(--beam);
+    background: var(--beam-dim);
+    transform: translateX(10px);
+    box-shadow: 0 0 20px var(--beam-glow);
   }
-  .contact-link .cl-icon { font-size: 1rem; }
+  .cl-icon { font-size: 0.9rem; color: var(--beam); }
   .contact-big {
-    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-    font-weight: 800; line-height: 1.1;
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    font-weight: 700; line-height: 1.2;
     margin-bottom: 1rem;
+    letter-spacing: -0.01em;
   }
   .contact-sub {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.82rem; line-height: 1.9;
-    color: rgba(238,244,255,0.45);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem; line-height: 2;
+    color: rgba(221,238,255,0.4);
   }
 
-  /* FOOTER */
+  /* ── FOOTER ── */
   footer {
-    padding: 2rem 4rem;
+    padding: 1.8rem 4rem;
     border-top: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: center;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem; letter-spacing: 0.1em;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem; letter-spacing: 0.1em;
     color: var(--muted);
+    position: relative; z-index: 10;
+  }
+  .footer-energy {
+    color: var(--detect);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .footer-energy::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--detect);
+    box-shadow: 0 0 6px var(--detect);
+    animation: pulse-dot 2s infinite;
   }
 
-  /* ANIMATIONS */
+  /* ── ANIMATIONS ── */
   @keyframes fadeUp {
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(6px); }
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(7px); }
   }
   .reveal {
-    opacity: 0; transform: translateY(24px);
+    opacity: 0; transform: translateY(22px);
     transition: opacity .7s, transform .7s;
   }
   .reveal.visible { opacity: 1; transform: none; }
 
-  /* RESPONSIVE */
+  /* ── EQUATIONS OVERLAY ── */
+  .eq-overlay {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .eq {
+    position: absolute;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: rgba(0,170,255,0.06);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  /* ── NOTES ── */
+  #notes {
+    padding: 7rem 4rem;
+  }
+  .notes-header { margin-bottom: 4rem; }
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2rem;
+  }
+
+  .note-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+    cursor: none;
+    transition: border-color .3s, transform .3s, box-shadow .3s;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .note-card:hover {
+    border-color: var(--beam);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0,170,255,0.12);
+  }
+  .note-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--beam), var(--collision));
+    opacity: 0; transition: opacity .3s;
+    z-index: 2;
+  }
+  .note-card:hover::before { opacity: 1; }
+
+  /* Canvas preview area */
+  .note-preview {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: #080e1c;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .note-preview canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
+    display: block;
+  }
+  .note-preview-loading {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+    position: absolute; inset: 0;
+    justify-content: center;
+  }
+  .note-preview-loading .loader-ring {
+    width: 32px; height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--beam);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .note-preview-overlay {
+    position: absolute; inset: 0;
+    background: rgba(2,4,10,0.0);
+    transition: background .3s;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 3;
+  }
+  .note-card:hover .note-preview-overlay {
+    background: rgba(2,4,10,0.55);
+  }
+  .note-open-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid var(--beam);
+    color: var(--beam);
+    background: rgba(0,170,255,0.12);
+    opacity: 0; transform: scale(0.9);
+    transition: opacity .25s, transform .25s;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    cursor: none;
+  }
+  .note-card:hover .note-open-btn {
+    opacity: 1; transform: scale(1);
+  }
+
+  .note-meta {
+    padding: 1.2rem 1.4rem 1.4rem;
+    border-top: 1px solid var(--border);
+  }
+  .note-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.3rem;
+  }
+  .note-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem; letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+  .note-footer-row {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .note-pages {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.1em;
+    color: var(--collision);
+  }
+  .note-dl {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.1em;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    transition: all .2s;
+    clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+    cursor: none;
+  }
+  .note-dl:hover { color: var(--beam); border-color: var(--beam); }
+
+  /* ── PDF MODAL ── */
+  #pdf-modal {
+    position: fixed; inset: 0;
+    z-index: 2000;
+    background: rgba(2,4,10,0.96);
+    backdrop-filter: blur(16px);
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  #pdf-modal.open { opacity: 1; pointer-events: all; }
+
+  .modal-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: rgba(2,4,10,0.8);
+  }
+  .modal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem; letter-spacing: 0.15em;
+    color: var(--beam);
+  }
+  .modal-controls {
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .modal-page-info {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .modal-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.12em;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--white);
+    cursor: none;
+    transition: all .2s;
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+  }
+  .modal-btn:hover { border-color: var(--beam); color: var(--beam); }
+  .modal-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .modal-close {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.12em;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--border-hot);
+    background: transparent;
+    color: var(--collision);
+    cursor: none;
+    transition: all .2s;
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+  }
+  .modal-close:hover { background: var(--coll-dim); }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1rem;
+    gap: 1.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .modal-body::-webkit-scrollbar { width: 4px; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .modal-page-wrap {
+    position: relative;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.6);
+  }
+  .modal-page-wrap canvas {
+    display: block;
+    max-width: min(880px, 90vw);
+    width: 100%;
+    height: auto !important;
+  }
+  .modal-page-num {
+    position: absolute; bottom: 0.5rem; right: 0.8rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 0.1em;
+    color: var(--muted);
+    background: rgba(2,4,10,0.7);
+    padding: 0.2rem 0.5rem;
+  }
+
+  .modal-zoom-bar {
+    position: fixed; bottom: 1.5rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 0.8rem;
+    background: rgba(4,8,16,0.92);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1.2rem;
+    backdrop-filter: blur(10px);
+    z-index: 2100;
+  }
+  .zoom-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem; letter-spacing: 0.1em;
+    color: var(--muted); min-width: 42px; text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
-    nav { padding: 1.2rem 2rem; }
+    nav { padding: 1.2rem 1.8rem; }
     .nav-links { display: none; }
+    .nav-status { display: none; }
     #hero, #about, #research, #experience, #skills, #contact, footer { padding-left: 1.8rem; padding-right: 1.8rem; }
     #about, #contact { grid-template-columns: 1fr; gap: 3rem; }
     .research-grid { grid-template-columns: 1fr; }
     .skills-layout { grid-template-columns: 1fr; gap: 3rem; }
+    .hero-ring { display: none; }
   }
 </style>
 </head>
@@ -471,44 +918,100 @@
 
 <div id="cursor"></div>
 <div id="cursor-ring"></div>
+<div id="cursor-cross-h"></div>
+<div id="cursor-cross-v"></div>
 <canvas id="bg-canvas"></canvas>
 
+<!-- ── NAV ── -->
 <nav>
-  <a href="#hero" class="nav-logo">RM // Quantum</a>
+  <a href="#hero" class="nav-logo">
+    <div class="nav-logo-dot"></div>
+    RM // QUANTUM
+  </a>
+  <div class="nav-status">BEAM_STATUS: ACTIVE</div>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
     <li><a href="#research">Research</a></li>
     <li><a href="#experience">Experience</a></li>
     <li><a href="#skills">Skills</a></li>
+    <li><a href="#notes">Notes</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
 </nav>
 
-<!-- HERO -->
+<!-- ── HERO ── -->
 <section id="hero">
+  <!-- Decorative accelerator ring SVG -->
+  <svg class="hero-ring" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Outer ring -->
+    <circle cx="300" cy="300" r="270" stroke="#00aaff" stroke-width="0.8" stroke-dasharray="4 8"/>
+    <!-- Mid ring -->
+    <circle cx="300" cy="300" r="220" stroke="#00aaff" stroke-width="1.2"/>
+    <!-- Inner ring -->
+    <circle cx="300" cy="300" r="170" stroke="#ff8c00" stroke-width="0.8" stroke-dasharray="2 6"/>
+    <!-- Detector spokes -->
+    <line x1="300" y1="30" x2="300" y2="80" stroke="#00aaff" stroke-width="1"/>
+    <line x1="300" y1="520" x2="300" y2="570" stroke="#00aaff" stroke-width="1"/>
+    <line x1="30" y1="300" x2="80" y2="300" stroke="#00aaff" stroke-width="1"/>
+    <line x1="520" y1="300" x2="570" y2="300" stroke="#00aaff" stroke-width="1"/>
+    <line x1="109" y1="109" x2="145" y2="145" stroke="#00aaff" stroke-width="0.8"/>
+    <line x1="455" y1="455" x2="491" y2="491" stroke="#00aaff" stroke-width="0.8"/>
+    <line x1="491" y1="109" x2="455" y2="145" stroke="#00aaff" stroke-width="0.8"/>
+    <line x1="109" y1="491" x2="145" y2="455" stroke="#00aaff" stroke-width="0.8"/>
+    <!-- Quadrant arcs -->
+    <path d="M 300 80 A 220 220 0 0 1 520 300" stroke="#00ff88" stroke-width="0.6" stroke-dasharray="3 12"/>
+    <path d="M 520 300 A 220 220 0 0 1 300 520" stroke="#00ff88" stroke-width="0.6" stroke-dasharray="3 12"/>
+    <!-- Collision point cross -->
+    <line x1="285" y1="300" x2="315" y2="300" stroke="#ff8c00" stroke-width="1.5"/>
+    <line x1="300" y1="285" x2="300" y2="315" stroke="#ff8c00" stroke-width="1.5"/>
+    <circle cx="300" cy="300" r="4" fill="#ff8c00"/>
+    <!-- Detector labels -->
+    <text x="310" y="36" fill="#00aaff" font-size="10" font-family="monospace">DET-A</text>
+    <text x="310" y="576" fill="#00aaff" font-size="10" font-family="monospace">DET-C</text>
+    <text x="35" y="296" fill="#00aaff" font-size="10" font-family="monospace">DET-B</text>
+    <text x="530" y="296" fill="#00aaff" font-size="10" font-family="monospace">DET-D</text>
+  </svg>
+
   <div class="hero-inner">
-    <div class="hero-tag">Quantum ML Researcher & Developer</div>
+    <div class="hero-tag">
+      <div class="hero-tag-line"></div>
+      Quantum ML Researcher &amp; Developer
+    </div>
     <h1>
       <span class="dim">Riccardo</span><br>
       <span class="accent">Marega</span>
     </h1>
     <p class="hero-desc">
       Bridging physics, computer science and quantum hardware.<br>
-      R&D at IBM Italy · QCNNs · Variational Algorithms · Photonic Interfaces.
+      R&amp;D at IBM Italy · QCNNs · Variational Algorithms · Photonic Interfaces.
     </p>
+    <div class="hero-energy">
+      <span>FIELD_STATE: <span class="energy-val">COHERENT</span></span>
+      <span>LOCATION: <span class="energy-val">MILAN_IT</span></span>
+      <span>MODE: <span class="energy-val">RESEARCH</span></span>
+    </div>
     <div class="hero-ctas">
       <a href="#contact" class="btn btn-primary">Get in touch</a>
       <a href="#experience" class="btn btn-ghost">View experience</a>
     </div>
   </div>
   <div class="hero-scroll">
-    <span></span>
+    <div class="hero-scroll-line"></div>
     scroll
   </div>
 </section>
 
-<!-- ABOUT -->
+<div class="beam-divider"></div>
+
+<!-- ── ABOUT ── -->
 <section id="about">
+  <div class="eq-overlay" aria-hidden="true">
+    <div class="eq" style="top:10%;left:5%">|ψ⟩ = α|0⟩ + β|1⟩</div>
+    <div class="eq" style="top:40%;left:8%">Ĥ|ψ⟩ = E|ψ⟩</div>
+    <div class="eq" style="top:70%;left:3%">∮ B·dA = 0</div>
+    <div class="eq" style="top:20%;right:2%">∇²ψ + k²ψ = 0</div>
+    <div class="eq" style="top:60%;right:5%">e^(iHt/ℏ)|ψ₀⟩</div>
+  </div>
   <div class="reveal">
     <div class="section-label">About</div>
     <h2>Physics meets<br>quantum computation.</h2>
@@ -518,7 +1021,7 @@
       <p>Based in Milan, Italy. Always seeking the point where physics equations become running code.</p>
     </div>
   </div>
-  <div class="reveal" style="transition-delay: .15s">
+  <div class="reveal" style="transition-delay:.15s">
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-num">97</div>
@@ -540,7 +1043,9 @@
   </div>
 </section>
 
-<!-- RESEARCH -->
+<div class="beam-divider"></div>
+
+<!-- ── RESEARCH ── -->
 <section id="research">
   <div class="research-header reveal">
     <div class="section-label">Research</div>
@@ -548,43 +1053,51 @@
   </div>
   <div class="research-grid">
     <div class="r-card reveal">
-      <div class="r-icon">⬡</div>
+      <span class="r-track">TRK-001</span>
+      <span class="r-icon">⬡</span>
       <div class="r-title">Quantum Convolutional Neural Networks</div>
       <div class="r-desc">Developing and enhancing QCNN architectures at IBM Italy. Exploring novel performance improvement strategies and QML application domains.</div>
     </div>
     <div class="r-card reveal" style="transition-delay:.1s">
-      <div class="r-icon">∿</div>
+      <span class="r-track">TRK-002</span>
+      <span class="r-icon">∿</span>
       <div class="r-title">Variational Quantum Eigensolver</div>
       <div class="r-desc">Simulated molecular systems via VQE with pulse-based ansätze. Thesis research at Università degli Studi di Milano-Bicocca under Prof. A. Giachero.</div>
     </div>
     <div class="r-card reveal" style="transition-delay:.2s">
-      <div class="r-icon">⟳</div>
+      <span class="r-track">TRK-003</span>
+      <span class="r-icon">⟳</span>
       <div class="r-title">Quantum Random Walks</div>
       <div class="r-desc">Theoretical study at ROTONIUM; produced research-level lecture notes for internal training and algorithmic dissemination.</div>
     </div>
     <div class="r-card reveal" style="transition-delay:.3s">
-      <div class="r-icon">◈</div>
+      <span class="r-track">TRK-004</span>
+      <span class="r-icon">◈</span>
       <div class="r-title">Photonic Quantum Computing</div>
       <div class="r-desc">Built a front-end interface for a photonic quantum processor, abstracting low-level hardware control for intuitive researcher interaction.</div>
     </div>
     <div class="r-card reveal" style="transition-delay:.4s">
-      <div class="r-icon">⚛</div>
+      <span class="r-track">TRK-005</span>
+      <span class="r-icon">⚛</span>
       <div class="r-title">Quantum Machine Learning</div>
       <div class="r-desc">Master's thesis benchmarking advanced CNN architectures with in-depth exploration of quantum computation at Università Ca' Foscari, Venice.</div>
     </div>
     <div class="r-card reveal" style="transition-delay:.5s">
-      <div class="r-icon">⟨ψ|</div>
+      <span class="r-track">TRK-006</span>
+      <span class="r-icon">⟨ψ|</span>
       <div class="r-title">Hardware–Software Integration</div>
       <div class="r-desc">Bridging the gap between quantum hardware and software layers — from photonic processors to variational circuit interfaces.</div>
     </div>
   </div>
 </section>
 
-<!-- EXPERIENCE -->
+<div class="beam-divider"></div>
+
+<!-- ── EXPERIENCE ── -->
 <section id="experience">
   <div class="exp-header reveal">
     <div class="section-label">Experience</div>
-    <h2>A path shaped by<br>curiosity & code.</h2>
+    <h2>A path shaped by<br>curiosity &amp; code.</h2>
   </div>
   <div class="timeline">
     <div class="tl-item">
@@ -592,7 +1105,7 @@
       <div class="tl-date">Sep 2025 – Present</div>
       <div class="tl-company">IBM Italy</div>
       <div class="tl-role">Research Project Student · Milan</div>
-      <div class="tl-desc">Development and enhancement of Quantum Convolutional Neural Networks (QCNNs): exploring performance improvement strategies and QML application domains. Involved in broader R&D initiatives.</div>
+      <div class="tl-desc">Development and enhancement of Quantum Convolutional Neural Networks (QCNNs): exploring performance improvement strategies and QML application domains. Involved in broader R&amp;D initiatives.</div>
     </div>
     <div class="tl-item">
       <div class="tl-dot"></div>
@@ -604,7 +1117,7 @@
     <div class="tl-item">
       <div class="tl-dot"></div>
       <div class="tl-date">Mar 2025 – Oct 2025</div>
-      <div class="tl-company">SI&O</div>
+      <div class="tl-company">SI&amp;O</div>
       <div class="tl-role">Software Developer · San Giuliano Milanese</div>
       <div class="tl-desc">Designed, developed and tested multi-language applications. Resolved bugs, improved code efficiency and integrated secure solutions within the team.</div>
     </div>
@@ -625,7 +1138,9 @@
   </div>
 </section>
 
-<!-- SKILLS -->
+<div class="beam-divider"></div>
+
+<!-- ── SKILLS ── -->
 <section id="skills">
   <div class="reveal">
     <div class="section-label">Skills</div>
@@ -633,7 +1148,7 @@
   </div>
   <div class="skills-layout">
     <div class="reveal" style="transition-delay:.1s">
-      <div class="skill-group-title">Programming languages</div>
+      <div class="skill-group-title">// Programming languages</div>
       <div class="skill-bars">
         <div class="skill-row">
           <span class="skill-name">Python</span>
@@ -658,8 +1173,8 @@
       </div>
     </div>
     <div class="reveal" style="transition-delay:.2s">
-      <div class="skill-group-title">Quantum & Research</div>
-      <div class="tags-grid" id="tags">
+      <div class="skill-group-title">// Quantum &amp; Research</div>
+      <div class="tags-grid">
         <span class="tag">QCNNs</span>
         <span class="tag">VQE</span>
         <span class="tag">Quantum Random Walks</span>
@@ -678,18 +1193,52 @@
   </div>
 </section>
 
-<!-- CONTACT -->
+<div class="beam-divider"></div>
+
+<!-- ── NOTES ── -->
+<section id="notes">
+  <div class="notes-header reveal">
+    <div class="section-label">Notes</div>
+    <h2>LaTeX field notes &amp;<br>lecture materials.</h2>
+  </div>
+  <div class="notes-grid" id="notes-grid">
+    <!-- Cards injected by JS -->
+  </div>
+</section>
+
+<!-- ── PDF MODAL ── -->
+<div id="pdf-modal" role="dialog" aria-modal="true" aria-label="PDF viewer">
+  <div class="modal-topbar">
+    <span class="modal-title" id="modal-title">DOCUMENT_VIEWER</span>
+    <div class="modal-controls">
+      <span class="modal-page-info" id="modal-page-info">— / —</span>
+      <button class="modal-btn" id="modal-prev">◂ PREV</button>
+      <button class="modal-btn" id="modal-next">NEXT ▸</button>
+      <button class="modal-close" id="modal-close-btn">✕ CLOSE</button>
+    </div>
+  </div>
+  <div class="modal-body" id="modal-body"></div>
+  <div class="modal-zoom-bar">
+    <button class="modal-btn" id="zoom-out">− ZOOM</button>
+    <span class="zoom-label" id="zoom-label">100%</span>
+    <button class="modal-btn" id="zoom-in">+ ZOOM</button>
+  </div>
+</div>
+
+<div class="beam-divider"></div>
+
+<!-- ── CONTACT ── -->
 <section id="contact">
   <div class="reveal">
     <div class="section-label">Contact</div>
     <div class="contact-big">Let's build the<br>quantum future.</div>
-    <p class="contact-sub">Open to R&D collaborations, research opportunities and quantum computing projects. Based in Milan, working remotely worldwide.</p>
+    <p class="contact-sub">Open to R&amp;D collaborations, research opportunities and quantum computing projects. Based in Milan, working remotely worldwide.</p>
   </div>
   <div class="reveal" style="transition-delay:.15s">
     <div class="contact-links">
-      <a href="mailto:maregariccardo.rm0@gmail.com" class="contact-link">
+      <a href="/cdn-cgi/l/email-protection#2f424e5d4a484e5d464c4c4e5d4b40015d421f6f48424e4643014c4042" class="contact-link">
         <span class="cl-icon">✉</span>
-        maregariccardo.rm0@gmail.com
+        <span class="__cf_email__" data-cfemail="abc6cad9cecccad9c2c8c8cad9cfc485d9c69bebccc6cac2c785c8c4c6">[email&#160;protected]</span>
       </a>
       <a href="tel:+393332693600" class="contact-link">
         <span class="cl-icon">☏</span>
@@ -709,115 +1258,498 @@
 
 <footer>
   <span>© 2026 Riccardo Marega</span>
-  <span>Quantum ML · Milano, IT</span>
+  <span class="footer-energy">SYSTEM_ONLINE // QUANTUM ML · MILANO_IT</span>
 </footer>
 
-<script>
-// CURSOR
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursor-ring');
+<!-- ═══════════════════════════════════════════ -->
+<!--  JAVASCRIPT                                 -->
+<!-- ═══════════════════════════════════════════ -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ── CURSOR ── */
+const cursor   = document.getElementById('cursor');
+const ring     = document.getElementById('cursor-ring');
+const crossH   = document.getElementById('cursor-cross-h');
+const crossV   = document.getElementById('cursor-cross-v');
 let mx = 0, my = 0, rx = 0, ry = 0;
-document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  crossH.style.top  = my + 'px';
+  crossV.style.left = mx + 'px';
+});
 (function tick() {
-  rx += (mx - rx) * 0.12;
-  ry += (my - ry) * 0.12;
+  rx += (mx - rx) * 0.1;
+  ry += (my - ry) * 0.1;
   cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
-  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  ring.style.left   = rx + 'px'; ring.style.top   = ry + 'px';
   requestAnimationFrame(tick);
 })();
+
 document.querySelectorAll('a, button').forEach(el => {
-  el.addEventListener('mouseenter', () => { cursor.style.width = '6px'; cursor.style.height = '6px'; ring.style.width = '48px'; ring.style.height = '48px'; });
-  el.addEventListener('mouseleave', () => { cursor.style.width = '12px'; cursor.style.height = '12px'; ring.style.width = '36px'; ring.style.height = '36px'; });
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width = '5px'; cursor.style.height = '5px';
+    ring.style.width = '52px'; ring.style.height = '52px';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width = '10px'; cursor.style.height = '10px';
+    ring.style.width = '32px'; ring.style.height = '32px';
+  });
 });
 
-// CANVAS QUANTUM PARTICLES
+/* ══════════════════════════════════════════════
+   CANVAS — PARTICLE COLLIDER SIMULATION
+   Accelerator rings + beam particles + collisions
+   ══════════════════════════════════════════════ */
 const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-let W, H, nodes = [], lines = [];
+const ctx    = canvas.getContext('2d');
+let W, H;
 
-function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-resize(); window.addEventListener('resize', resize);
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
 
-const N = 55;
-for (let i = 0; i < N; i++) {
-  nodes.push({
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-    vx: (Math.random() - 0.5) * 0.35,
-    vy: (Math.random() - 0.5) * 0.35,
-    r: Math.random() * 1.8 + 0.5,
-    pulse: Math.random() * Math.PI * 2
+/* ── Rings ── */
+const rings = [
+  { cx: W * 0.75, cy: H * 0.45, r: Math.min(W, H) * 0.30, speed:  0.0008 },
+  { cx: W * 0.75, cy: H * 0.45, r: Math.min(W, H) * 0.22, speed: -0.0012 },
+  { cx: W * 0.20, cy: H * 0.70, r: Math.min(W, H) * 0.14, speed:  0.0015 },
+];
+
+/* ── Beam particles ── */
+const beamParticles = [];
+const BEAM_COUNT = 28;
+for (let i = 0; i < BEAM_COUNT; i++) {
+  const ring = rings[i % 2];
+  const angle = (i / BEAM_COUNT) * Math.PI * 2;
+  beamParticles.push({
+    ring: i % 2,
+    angle,
+    speed: (0.003 + Math.random() * 0.004) * (i % 2 === 0 ? 1 : -1),
+    size:  0.8 + Math.random() * 1.4,
+    trail: [],
+    TRAIL_LEN: 14 + Math.floor(Math.random() * 18),
   });
 }
 
-function drawCanvas() {
+/* ── Collision sparks ── */
+const sparks = [];
+function spawnCollision(x, y) {
+  const count = 12 + Math.floor(Math.random() * 12);
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.5 + Math.random() * 3.5;
+    sparks.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 1.0,
+      decay: 0.025 + Math.random() * 0.04,
+      size:  0.8 + Math.random() * 2,
+      type:  Math.random() > 0.5 ? 'beam' : 'collision',
+    });
+  }
+}
+
+/* ── Ambient float nodes ── */
+const floatNodes = [];
+const FLOAT_N = 30;
+for (let i = 0; i < FLOAT_N; i++) {
+  floatNodes.push({
+    x: Math.random() * 1920,
+    y: Math.random() * 1080,
+    vx: (Math.random() - 0.5) * 0.25,
+    vy: (Math.random() - 0.5) * 0.25,
+    r: 0.5 + Math.random() * 1.2,
+    pulse: Math.random() * Math.PI * 2,
+  });
+}
+
+let collisionTimer = 0;
+
+function drawFrame() {
   ctx.clearRect(0, 0, W, H);
   const t = Date.now() * 0.001;
 
-  for (let n of nodes) {
-    n.x += n.vx; n.y += n.vy; n.pulse += 0.02;
-    if (n.x < 0 || n.x > W) n.vx *= -1;
-    if (n.y < 0 || n.y > H) n.vy *= -1;
+  /* Update ring centres (responsive) */
+  rings[0].cx = W * 0.72; rings[0].cy = H * 0.42; rings[0].r = Math.min(W,H)*0.28;
+  rings[1].cx = W * 0.72; rings[1].cy = H * 0.42; rings[1].r = Math.min(W,H)*0.20;
+  rings[2].cx = W * 0.18; rings[2].cy = H * 0.72; rings[2].r = Math.min(W,H)*0.13;
+
+  /* ── Draw rings ── */
+  rings.forEach((ring, ri) => {
+    const alpha = ri === 2 ? 0.12 : 0.18;
+    ctx.beginPath();
+    ctx.arc(ring.cx, ring.cy, ring.r, 0, Math.PI*2);
+    ctx.strokeStyle = ri === 0 ? `rgba(0,170,255,${alpha})` : `rgba(0,170,255,${alpha*0.7})`;
+    ctx.lineWidth = ri === 0 ? 1.2 : 0.8;
+    ctx.setLineDash(ri === 1 ? [4, 12] : []);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* Spoke ticks */
+    for (let s = 0; s < 8; s++) {
+      const a = (s / 8) * Math.PI * 2;
+      const cos = Math.cos(a); const sin = Math.sin(a);
+      const inner = ring.r - 8; const outer = ring.r + 8;
+      ctx.beginPath();
+      ctx.moveTo(ring.cx + cos*inner, ring.cy + sin*inner);
+      ctx.lineTo(ring.cx + cos*outer, ring.cy + sin*outer);
+      ctx.strokeStyle = `rgba(0,170,255,${alpha * 0.8})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+  });
+
+  /* ── Beam particles ── */
+  beamParticles.forEach(p => {
+    p.angle += p.speed;
+    const ring = rings[p.ring];
+    const x = ring.cx + Math.cos(p.angle) * ring.r;
+    const y = ring.cy + Math.sin(p.angle) * ring.r;
+
+    p.trail.push({ x, y });
+    if (p.trail.length > p.TRAIL_LEN) p.trail.shift();
+
+    /* Trail */
+    for (let i = 1; i < p.trail.length; i++) {
+      const frac = i / p.trail.length;
+      ctx.beginPath();
+      ctx.moveTo(p.trail[i-1].x, p.trail[i-1].y);
+      ctx.lineTo(p.trail[i].x,   p.trail[i].y);
+      ctx.strokeStyle = `rgba(0,170,255,${frac * 0.55})`;
+      ctx.lineWidth = frac * p.size * 0.8;
+      ctx.stroke();
+    }
+
+    /* Head */
+    ctx.beginPath();
+    ctx.arc(x, y, p.size * 1.1, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(0,200,255,0.9)';
+    ctx.fill();
+
+    /* Glow */
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, p.size*5);
+    grd.addColorStop(0, 'rgba(0,170,255,0.3)');
+    grd.addColorStop(1, 'rgba(0,170,255,0)');
+    ctx.beginPath();
+    ctx.arc(x, y, p.size*5, 0, Math.PI*2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+  });
+
+  /* ── Periodic collision event ── */
+  collisionTimer += 0.016;
+  if (collisionTimer > 3.5) {
+    collisionTimer = 0;
+    const r = rings[Math.random() > 0.5 ? 0 : 2];
+    const a = Math.random() * Math.PI * 2;
+    spawnCollision(r.cx + Math.cos(a)*r.r, r.cy + Math.sin(a)*r.r);
   }
 
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const dx = nodes[i].x - nodes[j].x;
-      const dy = nodes[i].y - nodes[j].y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 160) {
-        const alpha = (1 - dist / 160) * 0.25;
+  /* ── Draw sparks ── */
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const s = sparks[i];
+    s.x += s.vx; s.y += s.vy;
+    s.vx *= 0.96; s.vy *= 0.96;
+    s.life -= s.decay;
+    if (s.life <= 0) { sparks.splice(i, 1); continue; }
+
+    const col = s.type === 'beam'
+      ? `rgba(0,200,255,${s.life * 0.85})`
+      : `rgba(255,160,0,${s.life * 0.85})`;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI*2);
+    ctx.fillStyle = col;
+    ctx.fill();
+  }
+
+  /* ── Ambient float nodes + connectors ── */
+  floatNodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy; n.pulse += 0.018;
+    if (n.x < 0 || n.x > W) n.vx *= -1;
+    if (n.y < 0 || n.y > H) n.vy *= -1;
+  });
+  for (let i = 0; i < floatNodes.length; i++) {
+    for (let j = i+1; j < floatNodes.length; j++) {
+      const dx = floatNodes[i].x - floatNodes[j].x;
+      const dy = floatNodes[i].y - floatNodes[j].y;
+      const d  = Math.sqrt(dx*dx + dy*dy);
+      if (d < 130) {
         ctx.beginPath();
-        ctx.moveTo(nodes[i].x, nodes[i].y);
-        ctx.lineTo(nodes[j].x, nodes[j].y);
-        ctx.strokeStyle = `rgba(0,229,255,${alpha})`;
-        ctx.lineWidth = 0.6;
+        ctx.moveTo(floatNodes[i].x, floatNodes[i].y);
+        ctx.lineTo(floatNodes[j].x, floatNodes[j].y);
+        ctx.strokeStyle = `rgba(0,170,255,${(1-d/130)*0.12})`;
+        ctx.lineWidth = 0.4;
         ctx.stroke();
       }
     }
   }
-
-  for (let n of nodes) {
-    const glow = 0.5 + 0.5 * Math.sin(n.pulse);
+  floatNodes.forEach(n => {
+    const g = 0.4 + 0.6 * Math.sin(n.pulse);
     ctx.beginPath();
-    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(0,229,255,${0.3 + glow * 0.5})`;
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(0,170,255,${0.2 + g*0.35})`;
     ctx.fill();
-    if (n.r > 1.5) {
-      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 6);
-      g.addColorStop(0, `rgba(0,229,255,${0.12 * glow})`);
-      g.addColorStop(1, 'rgba(0,229,255,0)');
-      ctx.beginPath(); ctx.arc(n.x, n.y, n.r * 6, 0, Math.PI * 2);
-      ctx.fillStyle = g; ctx.fill();
+  });
+
+  /* ── Feynman line decorations ── */
+  /* Wavy propagator lines */
+  const fTime = t * 0.3;
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  ctx.strokeStyle = '#00aaff';
+  ctx.lineWidth = 0.8;
+  for (let f = 0; f < 4; f++) {
+    const y0 = (H * (0.15 + f * 0.22)) + Math.sin(fTime + f) * 15;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.02, y0);
+    for (let x = 0; x < W * 0.35; x += 4) {
+      ctx.lineTo(W*0.02 + x, y0 + Math.sin((x / 20) + fTime + f) * 6);
     }
+    ctx.stroke();
   }
+  ctx.restore();
 
-  requestAnimationFrame(drawCanvas);
+  requestAnimationFrame(drawFrame);
 }
-drawCanvas();
+drawFrame();
 
-// SCROLL REVEAL
+/* ── SCROLL REVEAL ── */
 const reveals = document.querySelectorAll('.reveal');
-const tl = document.querySelectorAll('.tl-item');
+const tlItems = document.querySelectorAll('.tl-item');
 
-const obs = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-}, { threshold: 0.15 });
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.12 });
+
 reveals.forEach(r => obs.observe(r));
-tl.forEach(t => obs.observe(t));
+tlItems.forEach(t => obs.observe(t));
 
-// SKILL BARS
-const barObs = new IntersectionObserver((entries) => {
+/* ── SKILL BARS ── */
+const barObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
       e.target.querySelectorAll('.skill-bar-fill').forEach(bar => {
         bar.style.width = bar.dataset.w + '%';
+        setTimeout(() => bar.classList.add('lit'), 1250);
       });
       barObs.unobserve(e.target);
     }
   });
 }, { threshold: 0.3 });
 document.querySelectorAll('.skill-bars').forEach(sb => barObs.observe(sb));
+</script>
+
+<!-- ── PDF.js ── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════
+   NOTES — PDF VIEWER
+   ══════════════════════════════════════════════ */
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ── Catalogue (add more entries here) ── */
+const NOTES = [
+  {
+    file:     'Particles1.pdf',
+    title:    'Particles I',
+    subtitle: 'Quantum Field Theory — Lecture Notes',
+  },
+];
+
+/* ── Modal state ── */
+let modalPdf   = null;
+let modalZoom  = 1.0;
+let currentVisiblePage = 1;
+
+const modal         = document.getElementById('pdf-modal');
+const modalBody     = document.getElementById('modal-body');
+const modalTitle    = document.getElementById('modal-title');
+const modalPageInfo = document.getElementById('modal-page-info');
+const modalPrev     = document.getElementById('modal-prev');
+const modalNext     = document.getElementById('modal-next');
+const modalCloseBtn = document.getElementById('modal-close-btn');
+const zoomIn        = document.getElementById('zoom-in');
+const zoomOut       = document.getElementById('zoom-out');
+const zoomLabel     = document.getElementById('zoom-label');
+
+/* ── Build note cards ── */
+const grid = document.getElementById('notes-grid');
+
+NOTES.forEach((note, idx) => {
+  const card = document.createElement('div');
+  card.className = 'note-card reveal';
+  card.style.transitionDelay = (idx * 0.1) + 's';
+  card.innerHTML = `
+    <div class="note-preview" id="prev-${idx}">
+      <div class="note-preview-loading" id="load-${idx}">
+        <div class="loader-ring"></div>
+        LOADING_PDF
+      </div>
+      <div class="note-preview-overlay">
+        <button class="note-open-btn" data-idx="${idx}">
+          &#9654; OPEN VIEWER
+        </button>
+      </div>
+    </div>
+    <div class="note-meta">
+      <div class="note-title">${note.title}</div>
+      <div class="note-subtitle">${note.subtitle}</div>
+      <div class="note-footer-row">
+        <span class="note-pages" id="pages-${idx}">— pages</span>
+        <a href="${note.file}" download class="note-dl">&#8595; PDF</a>
+      </div>
+    </div>
+  `;
+  grid.appendChild(card);
+  obs.observe(card);
+  renderPreview(note.file, idx);
+});
+
+async function renderPreview(file, idx) {
+  try {
+    const pdf  = await pdfjsLib.getDocument(file).promise;
+    const total = pdf.numPages;
+    document.getElementById('pages-' + idx).textContent = total + ' page' + (total !== 1 ? 's' : '');
+
+    const page    = await pdf.getPage(1);
+    const wrapper = document.getElementById('prev-' + idx);
+    const loading = document.getElementById('load-' + idx);
+
+    const viewport = page.getViewport({ scale: 1 });
+    const scale    = 300 / viewport.width;
+    const scaledVP = page.getViewport({ scale });
+
+    const cvs = document.createElement('canvas');
+    cvs.width  = scaledVP.width;
+    cvs.height = scaledVP.height;
+    await page.render({ canvasContext: cvs.getContext('2d'), viewport: scaledVP }).promise;
+
+    if (loading) loading.remove();
+    wrapper.insertBefore(cvs, wrapper.firstChild);
+  } catch (e) {
+    const loading = document.getElementById('load-' + idx);
+    if (loading) loading.innerHTML = '<span style="color:var(--muted);font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;letter-spacing:0.1em">FILE_NOT_FOUND</span>';
+  }
+}
+
+/* ── Open modal ── */
+async function openModal(idx) {
+  const note = NOTES[idx];
+  modalTitle.textContent = 'DOC // ' + note.title.toUpperCase();
+  modalBody.innerHTML = '';
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  modalZoom  = 1.0;
+  zoomLabel.textContent = '100%';
+  currentVisiblePage = 1;
+
+  try {
+    modalPdf = await pdfjsLib.getDocument(note.file).promise;
+    const total = modalPdf.numPages;
+    modalPageInfo.textContent = '1 / ' + total;
+    modalPrev.disabled = true;
+    modalNext.disabled = total <= 1;
+
+    for (let p = 1; p <= total; p++) {
+      const wrap = document.createElement('div');
+      wrap.className = 'modal-page-wrap';
+      wrap.id = 'modal-page-' + p;
+
+      const pg     = await modalPdf.getPage(p);
+      const baseVP = pg.getViewport({ scale: 1 });
+      const scale  = (Math.min(880, window.innerWidth * 0.9)) / baseVP.width * modalZoom;
+      const vp     = pg.getViewport({ scale });
+
+      const cvs = document.createElement('canvas');
+      cvs.width  = vp.width;
+      cvs.height = vp.height;
+      cvs.style.maxWidth = '100%';
+      await pg.render({ canvasContext: cvs.getContext('2d'), viewport: vp }).promise;
+
+      const numTag = document.createElement('span');
+      numTag.className = 'modal-page-num';
+      numTag.textContent = p + ' / ' + total;
+
+      wrap.appendChild(cvs);
+      wrap.appendChild(numTag);
+      modalBody.appendChild(wrap);
+    }
+
+    modalBody.addEventListener('scroll', updatePageInfo);
+  } catch(e) {
+    modalBody.innerHTML = '<p style="font-family:\'Share Tech Mono\',monospace;color:var(--muted);font-size:0.75rem;margin-top:3rem;text-align:center">ERROR: Could not load ' + note.file + '.<br>Make sure the file is in the same folder as index.html.</p>';
+  }
+}
+
+function updatePageInfo() {
+  if (!modalPdf) return;
+  const total = modalPdf.numPages;
+  const wraps = modalBody.querySelectorAll('.modal-page-wrap');
+  let visible = 1;
+  wraps.forEach((w, i) => {
+    const rect = w.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.55) visible = i + 1;
+  });
+  currentVisiblePage = visible;
+  modalPageInfo.textContent = visible + ' / ' + total;
+  modalPrev.disabled = visible <= 1;
+  modalNext.disabled = visible >= total;
+}
+
+modalPrev.addEventListener('click', () => {
+  const t = document.getElementById('modal-page-' + (currentVisiblePage - 1));
+  if (t) t.scrollIntoView({ behavior: 'smooth' });
+});
+modalNext.addEventListener('click', () => {
+  const t = document.getElementById('modal-page-' + (currentVisiblePage + 1));
+  if (t) t.scrollIntoView({ behavior: 'smooth' });
+});
+
+function closeModal() {
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+  modalPdf = null;
+  modalBody.innerHTML = '';
+  modalBody.removeEventListener('scroll', updatePageInfo);
+}
+modalCloseBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+async function reRender() {
+  if (!modalPdf) return;
+  const frac  = modalBody.scrollTop / (modalBody.scrollHeight || 1);
+  const total = modalPdf.numPages;
+  for (let p = 1; p <= total; p++) {
+    const wrap = document.getElementById('modal-page-' + p);
+    if (!wrap) continue;
+    const pg     = await modalPdf.getPage(p);
+    const baseVP = pg.getViewport({ scale: 1 });
+    const scale  = (Math.min(880, window.innerWidth * 0.9)) / baseVP.width * modalZoom;
+    const vp     = pg.getViewport({ scale });
+    const cvs    = wrap.querySelector('canvas');
+    cvs.width  = vp.width;
+    cvs.height = vp.height;
+    await pg.render({ canvasContext: cvs.getContext('2d'), viewport: vp }).promise;
+  }
+  modalBody.scrollTop = frac * modalBody.scrollHeight;
+  zoomLabel.textContent = Math.round(modalZoom * 100) + '%';
+}
+
+zoomIn.addEventListener('click',  () => { if (modalZoom < 2.5) { modalZoom = Math.min(2.5, +(modalZoom + 0.2).toFixed(1)); reRender(); } });
+zoomOut.addEventListener('click', () => { if (modalZoom > 0.4) { modalZoom = Math.max(0.4, +(modalZoom - 0.2).toFixed(1)); reRender(); } });
+
+grid.addEventListener('click', e => {
+  const btn = e.target.closest('.note-open-btn');
+  if (btn) openModal(parseInt(btn.dataset.idx));
+});
 </script>
 </body>
 </html>
