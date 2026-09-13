@@ -122,22 +122,6 @@
   .page-head p { margin-top: 0.65rem; color: var(--muted); font-size: 0.95rem; max-width: 54ch; }
   .page-head p code { font-family: 'IBM Plex Mono', monospace; font-size: 0.86em; color: var(--purple); background: var(--purple-dim); padding: 0.1em 0.35em; border-radius: 4px; }
 
-  .notice {
-    border: 1px solid var(--border); border-radius: var(--radius);
-    background: var(--panel);
-    padding: 0.9rem 1.1rem;
-    margin-bottom: 2.4rem;
-    display: none;
-    gap: 0.7rem;
-    font-size: 0.85rem;
-    color: var(--text-soft);
-    align-items: flex-start;
-  }
-  .notice.show { display: flex; }
-  .notice svg { color: var(--muted); flex-shrink: 0; margin-top: 0.15rem; }
-  .notice code { font-family: 'IBM Plex Mono', monospace; font-size: 0.85em; color: var(--accent); }
-  .notice p + p { margin-top: 0.4rem; }
-
   section.block { margin-top: 2.6rem; }
   .block-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.9rem; gap: 1rem; flex-wrap: wrap; }
   .block-head h2 { font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
@@ -202,48 +186,6 @@
     position: relative; z-index: 2; max-width: 840px; margin: 0 auto; padding: 0 1.5rem 3rem;
     font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; color: var(--muted);
     display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-  }
-  footer .cat-credit { display: flex; align-items: center; gap: 0.35rem; }
-  footer .cat-credit svg { color: var(--muted); }
-
-  /* ── wandering cat mascot ── */
-  .cat-walker {
-    position: fixed;
-    bottom: 10px;
-    left: -80px;
-    width: 56px; height: 36px;
-    color: var(--accent);
-    z-index: 40;
-    cursor: pointer;
-    animation: cat-walk 42s linear infinite;
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
-  }
-  .cat-walker .bob { animation: cat-bob 0.5s ease-in-out infinite; }
-  .cat-walker.observed .bob { color: var(--purple); animation: cat-pulse 0.6s ease; }
-  @keyframes cat-walk {
-    0%   { left: -80px; transform: scaleX(1); }
-    47%  { left: calc(100% + 20px); transform: scaleX(1); }
-    50%  { left: calc(100% + 20px); transform: scaleX(-1); }
-    97%  { left: -80px; transform: scaleX(-1); }
-    100% { left: -80px; transform: scaleX(1); }
-  }
-  @keyframes cat-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-  @keyframes cat-pulse { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
-
-  .cat-tooltip {
-    position: fixed; z-index: 41;
-    font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
-    color: var(--text); background: var(--panel); border: 1px solid var(--border);
-    padding: 0.35rem 0.6rem; border-radius: var(--radius);
-    pointer-events: none; opacity: 0; transition: opacity .25s, transform .25s;
-    transform: translateY(4px);
-    white-space: nowrap;
-  }
-  .cat-tooltip.show { opacity: 1; transform: translateY(0); }
-
-  @media (prefers-reduced-motion: reduce) {
-    .cat-walker { animation: none; left: 40px; }
-    .cat-walker .bob { animation: none; }
   }
 
   /* ── MODAL ── */
@@ -316,15 +258,7 @@
         <path d="M14 12.3 L15.8 14.1 M15.8 12.3 L14 14.1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
       </svg>
     </h1>
-    <p>A personal, local-only archive of notes — mathematics, physics, working drafts. This page never uploads anything: it simply looks inside its own <code>notes/</code> and <code>latex/</code> folders and lists whatever it finds there.</p>
-  </div>
-
-  <div class="notice" id="scan-notice">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L15 14H1L8 1Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M8 6v3.5M8 12v.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-    <div>
-      <p>Couldn't scan <code>notes/</code> and <code>latex/</code> automatically — this page needs to be served over HTTP, not opened directly as a file.</p>
-      <p>Run <code>serve.ps1</code> in this folder (right-click → Run with PowerShell), then open <code>http://localhost:8000/index.html</code>. As a fallback for hosts without folder listings, you can also list filenames by hand in <code>notes/manifest.json</code> / <code>latex/manifest.json</code>.</p>
-    </div>
+    <p>A personal, local-only archive of notes — mathematics, physics, working drafts. This page never accepts uploads: it only lists the files already present in the project's own <code>notes/</code> and <code>latex/</code> folders.</p>
   </div>
 
   <section class="block">
@@ -340,17 +274,12 @@
       <div id="notes-rows"></div>
       <div class="empty-state" id="notes-empty">
         <svg class="cat-box" viewBox="0 0 84 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x="2" y="16" width="80" height="50" rx="4" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 3" opacity="0.55"/>
-          <text x="42" y="11" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="currentColor" opacity="0.7">ψ = ?</text>
-          <circle cx="34" cy="38" r="11" stroke="currentColor" stroke-width="1.3"/>
-          <path d="M25 27 L22.5 17 L32 24 Z" fill="currentColor"/>
-          <path d="M43 27 L45.5 17 L36 24 Z" fill="currentColor"/>
-          <circle cx="30.5" cy="37" r="1.4" fill="currentColor"/>
-          <path d="M37 34.5 L40.5 38 M40.5 34.5 L37 38" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
-          <path d="M32 43 Q34 44.5 36 43" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none"/>
+          <rect x="6" y="10" width="72" height="52" rx="4" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 3" opacity="0.55"/>
+          <rect x="30" y="22" width="24" height="30" rx="2" stroke="currentColor" stroke-width="1.2" opacity="0.6"/>
+          <path d="M35 30h14M35 36h14M35 42h9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity="0.5"/>
         </svg>
-        <p>No notes here yet — the box is empty (or the cat is, depending on how you look at it).</p>
-        <p class="mono">Drop a PDF or image into <code>notes/</code>, then hit refresh.</p>
+        <p>No notes here yet.</p>
+        <p class="mono">Add a PDF or image to the project's <code>notes/</code> folder, then hit refresh.</p>
       </div>
     </div>
   </section>
@@ -368,16 +297,12 @@
       <div id="tex-rows"></div>
       <div class="empty-state" id="tex-empty">
         <svg class="cat-box" viewBox="0 0 84 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x="2" y="16" width="80" height="50" rx="4" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 3" opacity="0.55"/>
-          <circle cx="42" cy="40" r="11" stroke="currentColor" stroke-width="1.3"/>
-          <path d="M33 29 L30.5 19 L40 26 Z" fill="currentColor"/>
-          <path d="M51 29 L53.5 19 L44 26 Z" fill="currentColor"/>
-          <circle cx="38.5" cy="39" r="1.4" fill="currentColor"/>
-          <circle cx="45.5" cy="39" r="1.4" fill="currentColor"/>
-          <path d="M40 45 Q42 46.5 44 45" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none"/>
+          <rect x="6" y="10" width="72" height="52" rx="4" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 3" opacity="0.55"/>
+          <path d="M34 22 L24 36 L34 50" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
+          <path d="M50 22 L60 36 L50 50" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
         </svg>
         <p>No sources yet.</p>
-        <p class="mono">Drop a .tex, .sty, .cls or .bib file into <code>latex/</code>, then hit refresh.</p>
+        <p class="mono">Add a .tex, .sty, .cls or .bib file to the project's <code>latex/</code> folder, then hit refresh.</p>
       </div>
     </div>
   </section>
@@ -385,24 +310,7 @@
 
 <footer>
   <span id="footer-note" class="mono">scanning…</span>
-  <span class="cat-credit mono">
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.1"/><path d="M4 5 L3 1.5 L7 4 Z" fill="currentColor"/><path d="M12 5 L13 1.5 L9 4 Z" fill="currentColor"/></svg>
-    Schrödinger approves
-  </span>
 </footer>
-
-<div class="cat-walker" id="cat-walker" title="click to observe">
-  <svg class="bob" width="56" height="36" viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <ellipse cx="38" cy="32" rx="22" ry="12" fill="currentColor"/>
-    <circle cx="14" cy="21" r="11" fill="currentColor"/>
-    <path d="M6 14 L9 3 L15 12 Z" fill="currentColor"/>
-    <path d="M18 12 L22 2 L24 14 Z" fill="currentColor"/>
-    <path d="M58 28 Q75 24 71 8" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <rect x="24" y="40" width="5" height="8" rx="2" fill="currentColor"/>
-    <rect x="46" y="40" width="5" height="8" rx="2" fill="currentColor"/>
-    <circle cx="10" cy="19" r="1.4" fill="var(--bg)"/>
-  </svg>
-</div>
 
 <div id="modal" role="dialog" aria-modal="true">
   <div class="modal-topbar">
@@ -659,10 +567,9 @@ modalCloseBtn.addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-/* ── status pill + notice + refresh ── */
+/* ── status pill + refresh ── */
 const statusPill = document.getElementById('status-pill');
 const statusText = document.getElementById('status-text');
-const scanNotice = document.getElementById('scan-notice');
 const footerNote = document.getElementById('footer-note');
 const refreshBtn = document.getElementById('refresh-btn');
 
@@ -672,11 +579,10 @@ async function scanAll() {
   statusPill.classList.remove('live');
   const [notes, tex] = await Promise.all([loadNotes(), loadTex()]);
   const unavailable = notesScanUnavailable && texScanUnavailable;
-  scanNotice.classList.toggle('show', unavailable);
   const total = notes.count + tex.count;
   if (unavailable) {
     statusText.textContent = 'folder scan unavailable';
-    footerNote.textContent = 'serve this page over HTTP to enable auto-detection — see serve.ps1';
+    footerNote.textContent = 'no files detected in notes/ or latex/';
   } else {
     statusPill.classList.add('live');
     statusText.textContent = `${total} file${total === 1 ? '' : 's'} found locally`;
@@ -685,29 +591,6 @@ async function scanAll() {
   setTimeout(() => refreshBtn.classList.remove('spinning'), 500);
 }
 refreshBtn.addEventListener('click', scanAll);
-
-/* ── wandering cat mascot ── */
-const catWalker = document.getElementById('cat-walker');
-const catLines = [
-  'Observed. Wavefunction collapsed.',
-  'Still both alive and dead, technically.',
-  'Meow (superposition of meow and silence).',
-  '50% chance this was a purr.',
-];
-catWalker.addEventListener('click', () => {
-  catWalker.classList.remove('observed');
-  void catWalker.offsetWidth;
-  catWalker.classList.add('observed');
-  const rect = catWalker.getBoundingClientRect();
-  const tip = document.createElement('div');
-  tip.className = 'cat-tooltip';
-  tip.textContent = catLines[Math.floor(Math.random() * catLines.length)];
-  tip.style.left = Math.min(window.innerWidth - 220, Math.max(8, rect.left)) + 'px';
-  tip.style.top = (rect.top - 34) + 'px';
-  document.body.appendChild(tip);
-  requestAnimationFrame(() => tip.classList.add('show'));
-  setTimeout(() => { tip.classList.remove('show'); setTimeout(() => tip.remove(), 300); }, 1600);
-});
 
 /* ── dynamic background: drifting formulas + Feynman diagrams ── */
 const bgCanvas = document.getElementById('bg-canvas');
