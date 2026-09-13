@@ -1,1348 +1,2423 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Notes /</title>
-
-<style>
-:root{
-  --bg:#0d1117;
-  --panel:#161b22;
-  --panel-hover:#1c2333;
-  --border:#30363d;
-  --border-soft:#21262d;
-  --text:#e6edf3;
-  --text-soft:#c9d1d9;
-  --muted:#8b949e;
-  --accent:#58a6ff;
-  --accent-dim:rgba(88,166,255,.10);
-  --purple:#bc8cff;
-  --red:#f85149;
-  --green:#3fb950;
-  --radius:6px;
-}
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-html{
-  scroll-behavior:smooth;
-}
-
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:Inter,-apple-system,"Segoe UI",sans-serif;
-  font-size:15px;
-  line-height:1.5;
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-a{
-  color:inherit;
-}
-
-.mono{
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-}
-
-/* =========================================================
-   BACKGROUND
-   ========================================================= */
-
-#physics-bg{
-  position:fixed;
-  inset:0;
-  z-index:0;
-  width:100%;
-  height:100%;
-  pointer-events:none;
-  opacity:.78;
-}
-
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background:
-    radial-gradient(
-      ellipse 80% 55% at 50% -10%,
-      rgba(88,166,255,.09),
-      transparent 65%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(13,17,23,.08),
-      rgba(13,17,23,.30)
-    );
-}
-
-/* =========================================================
-   TOP BAR
-   ========================================================= */
-
-.topbar{
-  position:relative;
-  z-index:5;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:.9rem 2.5rem;
-  border-bottom:1px solid var(--border);
-  background:rgba(13,17,23,.86);
-  backdrop-filter:blur(9px);
-  gap:1rem;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:.55rem;
-  font:600 .95rem ui-monospace,SFMono-Regular,Menlo,monospace;
-}
-
-.brand .mark{
-  color:var(--accent);
-  font-weight:700;
-}
-
-.brand .slash{
-  color:var(--muted);
-  font-weight:400;
-}
-
-.status{
-  font:600 .68rem ui-monospace,SFMono-Regular,Menlo,monospace;
-  color:var(--muted);
-  display:flex;
-  align-items:center;
-  gap:.45rem;
-}
-
-.status .dot{
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  background:var(--green);
-}
-
-/* =========================================================
-   PROGRESS BAR
-   ========================================================= */
-
-.progress-section{
-  position:relative;
-  z-index:5;
-  padding:.7rem 2.5rem .75rem;
-  background:rgba(13,17,23,.82);
-  border-bottom:1px solid var(--border-soft);
-  backdrop-filter:blur(9px);
-}
-
-.progress-info{
-  max-width:980px;
-  margin:0 auto .42rem;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:1rem;
-  font:600 .66rem ui-monospace,SFMono-Regular,Menlo,monospace;
-}
-
-.progress-title{
-  color:var(--text-soft);
-}
-
-.progress-percent{
-  color:var(--muted);
-}
-
-.progress-track{
-  max-width:980px;
-  height:3px;
-  margin:0 auto;
-  background:var(--border-soft);
-  border-radius:999px;
-  overflow:hidden;
-}
-
-.progress-fill{
-  width:1%;
-  height:100%;
-  background:var(--accent);
-  border-radius:999px;
-  box-shadow:0 0 8px rgba(88,166,255,.35);
-}
-
-/* =========================================================
-   MAIN
-   ========================================================= */
-
-main{
-  position:relative;
-  z-index:2;
-  max-width:980px;
-  margin:0 auto;
-  padding:3.4rem 1.5rem 6rem;
-}
-
-.page-head{
-  margin-bottom:2.6rem;
-}
-
-.page-head h1{
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:2.05rem;
-  font-weight:700;
-  letter-spacing:-.01em;
-  display:flex;
-  align-items:center;
-  gap:.7rem;
-}
-
-.page-head h1 .mark{
-  color:var(--accent);
-  font-family:ui-monospace,monospace;
-}
-
-.page-head p{
-  margin-top:.65rem;
-  color:var(--muted);
-  font-size:.95rem;
-  max-width:70ch;
-}
-
-/* =========================================================
-   FILE SECTION
-   ========================================================= */
-
-section.block{
-  margin-top:2.6rem;
-}
-
-.block-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:.9rem;
-  gap:1rem;
-  flex-wrap:wrap;
-}
-
-.block-head h2{
-  font-size:1.05rem;
-  font-weight:600;
-  display:flex;
-  align-items:center;
-  gap:.5rem;
-}
-
-.count{
-  font:600 .64rem ui-monospace,monospace;
-  color:var(--muted);
-  padding:.18rem .42rem;
-  border:1px solid var(--border);
-  border-radius:4px;
-}
-
-.file-list{
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  overflow:hidden;
-  background:rgba(22,27,34,.92);
-  box-shadow:0 14px 50px rgba(0,0,0,.16);
-}
-
-.file-list-head,
-.file-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 100px 90px;
-  gap:1rem;
-  align-items:center;
-}
-
-.file-list-head{
-  padding:.55rem 1.1rem;
-  background:rgba(33,38,45,.9);
-  border-bottom:1px solid var(--border);
-  font:600 .64rem ui-monospace,monospace;
-  letter-spacing:.06em;
-  color:var(--muted);
-  text-transform:uppercase;
-}
-
-.file-list-head span:nth-child(n+2){
-  text-align:right;
-}
-
-.file-row{
-  padding:.78rem 1.1rem;
-  border-bottom:1px solid var(--border-soft);
-  transition:background .12s,border-color .12s;
-  cursor:pointer;
-}
-
-.file-row:last-child{
-  border-bottom:none;
-}
-
-.file-row:hover,
-.file-row:focus{
-  background:var(--panel-hover);
-}
-
-.file-row:focus{
-  outline:1px solid var(--accent);
-  outline-offset:-1px;
-}
-
-.file-name-cell{
-  display:flex;
-  align-items:center;
-  gap:.8rem;
-  min-width:0;
-}
-
-.file-icon{
-  width:30px;
-  height:30px;
-  border-radius:var(--radius);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-  background:rgba(248,81,73,.12);
-  color:var(--red);
-}
-
-.ext{
-  font:600 .55rem ui-monospace,monospace;
-}
-
-.file-name-text{
-  min-width:0;
-}
-
-.fname{
-  font:500 .88rem ui-monospace,monospace;
-  color:var(--text-soft);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.fmeta{
-  font:.65rem ui-monospace,monospace;
-  color:var(--muted);
-  margin-top:.15rem;
-}
-
-.file-meta{
-  font:.72rem ui-monospace,monospace;
-  color:var(--muted);
-  text-align:right;
-}
-
-.actions{
-  display:flex;
-  justify-content:flex-end;
-  gap:.35rem;
-}
-
-.icon-btn{
-  width:28px;
-  height:28px;
-  border:1px solid transparent;
-  background:transparent;
-  color:var(--muted);
-  border-radius:var(--radius);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  text-decoration:none;
-  font:inherit;
-}
-
-.icon-btn:hover{
-  color:var(--accent);
-  border-color:var(--border);
-  background:var(--bg);
-}
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-footer{
-  position:relative;
-  z-index:2;
-  max-width:980px;
-  margin:0 auto;
-  padding:0 1.5rem 3rem;
-  font:.66rem ui-monospace,monospace;
-  color:var(--muted);
-  display:flex;
-  justify-content:space-between;
-  gap:1rem;
-  flex-wrap:wrap;
-}
-
-/* =========================================================
-   MODAL
-   ========================================================= */
-
-#modal{
-  position:fixed;
-  inset:0;
-  z-index:2000;
-  background:rgba(6,8,11,.97);
-  display:flex;
-  flex-direction:column;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .18s;
-}
-
-#modal.open{
-  opacity:1;
-  pointer-events:auto;
-}
-
-.modal-topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:.9rem 1.1rem;
-  border-bottom:1px solid var(--border);
-  gap:1rem;
-  flex-shrink:0;
-}
-
-.modal-title{
-  font:.78rem ui-monospace,monospace;
-  color:var(--text);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.modal-controls{
-  display:flex;
-  align-items:center;
-  gap:.45rem;
-  flex-shrink:0;
-}
-
-.modal-btn{
-  font:.65rem ui-monospace,monospace;
-  padding:.38rem .72rem;
-  border:1px solid var(--border);
-  background:transparent;
-  color:var(--text);
-  cursor:pointer;
-  border-radius:var(--radius);
-  text-decoration:none;
-}
-
-.modal-btn:hover{
-  border-color:var(--accent);
-  color:var(--accent);
-}
-
-.modal-close{
-  color:var(--red);
-  border-color:rgba(248,81,73,.3);
-}
-
-.modal-close:hover{
-  border-color:var(--red);
-  color:var(--red);
-}
-
-.modal-body{
-  flex:1;
-  overflow:auto;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:2.2rem 1rem 3rem;
-}
-
-.viewer{
-  width:min(1100px,95vw);
-  height:calc(100vh - 125px);
-}
-
-.viewer iframe{
-  width:100%;
-  height:100%;
-  border:1px solid var(--border);
-  background:#fff;
-}
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media(max-width:700px){
-
-  .topbar{
-    padding:.9rem 1.2rem;
-  }
-
-  .status{
-    display:none;
-  }
-
-  .progress-section{
-    padding:.65rem 1.2rem .7rem;
-  }
-
-  main{
-    padding:2.6rem 1.2rem 4rem;
-  }
-
-  .file-list-head,
-  .file-row{
-    grid-template-columns:minmax(0,1fr) 82px;
-  }
-
-  .file-list-head span:nth-child(2),
-  .file-row .file-meta{
-    display:none;
-  }
-
-  footer{
-    padding:0 1.2rem 2.5rem;
-    flex-direction:column;
-  }
-
-  .page-head h1{
-    font-size:1.8rem;
-  }
-
-  .viewer{
-    height:calc(100vh - 115px);
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <title>Notes /</title>
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --panel-hover: #1c2333;
+      --border: #30363d;
+      --border-soft: #21262d;
+      --text: #e6edf3;
+      --text-soft: #c9d1d9;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-dim: rgba(88, 166, 255, 0.10);
+      --purple: #bc8cff;
+      --red: #f85149;
+      --green: #3fb950;
+      --radius: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    /* =========================================================
+       BACKGROUND
+       ========================================================= */
+
+    #physics-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.78;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+
+      background:
+        radial-gradient(
+          ellipse 80% 55% at 50% -10%,
+          rgba(88, 166, 255, 0.09),
+          transparent 65%
+        ),
+        linear-gradient(
+          180deg,
+          rgba(13, 17, 23, 0.08),
+          rgba(13, 17, 23, 0.30)
+        );
+    }
+
+    /* =========================================================
+       TOP BAR
+       ========================================================= */
+
+    .topbar {
+      position: relative;
+      z-index: 5;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding:
+        calc(0.9rem + env(safe-area-inset-top))
+        2.5rem
+        0.9rem;
+
+      border-bottom: 1px solid var(--border);
+
+      background: rgba(13, 17, 23, 0.86);
+      backdrop-filter: blur(9px);
+      -webkit-backdrop-filter: blur(9px);
+
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+
+      font:
+        600 0.95rem
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+    }
+
+    .brand .mark {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .brand .slash {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .status {
+      font:
+        600 0.68rem
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+
+      color: var(--muted);
+
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .status .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 7px rgba(63, 185, 80, 0.45);
+    }
+
+    /* =========================================================
+       PROGRESS BAR
+       ========================================================= */
+
+    .progress-section {
+      position: relative;
+      z-index: 5;
+
+      padding: 0.7rem 2.5rem 0.75rem;
+
+      background: rgba(13, 17, 23, 0.82);
+
+      border-bottom: 1px solid var(--border-soft);
+
+      backdrop-filter: blur(9px);
+      -webkit-backdrop-filter: blur(9px);
+    }
+
+    .progress-info {
+      max-width: 980px;
+      margin: 0 auto 0.42rem;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 1rem;
+
+      font:
+        600 0.66rem
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+    }
+
+    .progress-title {
+      color: var(--text-soft);
+    }
+
+    .progress-percent {
+      color: var(--muted);
+    }
+
+    .progress-track {
+      max-width: 980px;
+      height: 3px;
+      margin: 0 auto;
+
+      background: var(--border-soft);
+
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 1%;
+      height: 100%;
+
+      background: var(--accent);
+
+      border-radius: 999px;
+
+      box-shadow:
+        0 0 8px rgba(88, 166, 255, 0.35);
+    }
+
+    /* =========================================================
+       MAIN
+       ========================================================= */
+
+    main {
+      position: relative;
+      z-index: 2;
+
+      max-width: 980px;
+
+      margin: 0 auto;
+
+      padding:
+        3.4rem
+        1.5rem
+        6rem;
+    }
+
+    .page-head {
+      margin-bottom: 2.6rem;
+    }
+
+    .page-head h1 {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 2.05rem;
+      font-weight: 700;
+
+      letter-spacing: -0.01em;
+
+      display: flex;
+      align-items: center;
+
+      gap: 0.7rem;
+    }
+
+    .page-head h1 .mark {
+      color: var(--accent);
+      font-family: ui-monospace, monospace;
+    }
+
+    .page-head p {
+      margin-top: 0.65rem;
+
+      color: var(--muted);
+
+      font-size: 0.95rem;
+
+      max-width: 70ch;
+    }
+
+    /* =========================================================
+       FILE SECTION
+       ========================================================= */
+
+    section.block {
+      margin-top: 2.6rem;
+    }
+
+    .block-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin-bottom: 0.9rem;
+
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .block-head h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+
+      display: flex;
+      align-items: center;
+
+      gap: 0.5rem;
+    }
+
+    .count {
+      font:
+        600 0.64rem
+        ui-monospace,
+        monospace;
+
+      color: var(--muted);
+
+      padding: 0.18rem 0.42rem;
+
+      border: 1px solid var(--border);
+
+      border-radius: 4px;
+    }
+
+    .file-list {
+      border: 1px solid var(--border);
+
+      border-radius: var(--radius);
+
+      overflow: hidden;
+
+      background: rgba(22, 27, 34, 0.92);
+
+      box-shadow:
+        0 14px 50px rgba(0, 0, 0, 0.16);
+    }
+
+    .file-list-head,
+    .file-row {
+      display: grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        100px
+        90px;
+
+      gap: 1rem;
+
+      align-items: center;
+    }
+
+    .file-list-head {
+      padding: 0.55rem 1.1rem;
+
+      background: rgba(33, 38, 45, 0.9);
+
+      border-bottom: 1px solid var(--border);
+
+      font:
+        600 0.64rem
+        ui-monospace,
+        monospace;
+
+      letter-spacing: 0.06em;
+
+      color: var(--muted);
+
+      text-transform: uppercase;
+    }
+
+    .file-list-head span:nth-child(n + 2) {
+      text-align: right;
+    }
+
+    .file-row {
+      padding: 0.78rem 1.1rem;
+
+      border-bottom: 1px solid var(--border-soft);
+
+      transition:
+        background 0.12s,
+        border-color 0.12s,
+        transform 0.12s;
+
+      cursor: pointer;
+
+      touch-action: manipulation;
+    }
+
+    .file-row:last-child {
+      border-bottom: none;
+    }
+
+    .file-row:hover,
+    .file-row:focus {
+      background: var(--panel-hover);
+    }
+
+    .file-row:active {
+      background: rgba(88, 166, 255, 0.08);
+    }
+
+    .file-row:focus {
+      outline: 1px solid var(--accent);
+      outline-offset: -1px;
+    }
+
+    .file-name-cell {
+      display: flex;
+      align-items: center;
+
+      gap: 0.8rem;
+
+      min-width: 0;
+    }
+
+    .file-icon {
+      width: 30px;
+      height: 30px;
+
+      border-radius: var(--radius);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      flex-shrink: 0;
+
+      background: rgba(248, 81, 73, 0.12);
+
+      color: var(--red);
+    }
+
+    .ext {
+      font:
+        600 0.55rem
+        ui-monospace,
+        monospace;
+    }
+
+    .file-name-text {
+      min-width: 0;
+    }
+
+    .fname {
+      font:
+        500 0.88rem
+        ui-monospace,
+        monospace;
+
+      color: var(--text-soft);
+
+      white-space: nowrap;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+    }
+
+    .fmeta {
+      font:
+        0.65rem
+        ui-monospace,
+        monospace;
+
+      color: var(--muted);
+
+      margin-top: 0.15rem;
+    }
+
+    .file-meta {
+      font:
+        0.72rem
+        ui-monospace,
+        monospace;
+
+      color: var(--muted);
+
+      text-align: right;
+    }
+
+    .actions {
+      display: flex;
+
+      justify-content: flex-end;
+
+      gap: 0.35rem;
+    }
+
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+
+      border: 1px solid transparent;
+
+      background: transparent;
+
+      color: var(--muted);
+
+      border-radius: var(--radius);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+
+      text-decoration: none;
+
+      font: inherit;
+
+      flex-shrink: 0;
+    }
+
+    .icon-btn:hover {
+      color: var(--accent);
+
+      border-color: var(--border);
+
+      background: var(--bg);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+    footer {
+      position: relative;
+      z-index: 2;
+
+      max-width: 980px;
+
+      margin: 0 auto;
+
+      padding: 0 1.5rem 3rem;
+
+      font:
+        0.66rem
+        ui-monospace,
+        monospace;
+
+      color: var(--muted);
+
+      display: flex;
+      justify-content: space-between;
+
+      gap: 1rem;
+
+      flex-wrap: wrap;
+    }
+
+    /* =========================================================
+       MODAL
+       ========================================================= */
+
+    #modal {
+      position: fixed;
+      inset: 0;
+
+      z-index: 2000;
+
+      background: rgba(6, 8, 11, 0.985);
+
+      display: flex;
+      flex-direction: column;
+
+      opacity: 0;
+
+      pointer-events: none;
+
+      visibility: hidden;
+
+      transition:
+        opacity 0.18s,
+        visibility 0.18s;
+    }
+
+    #modal.open {
+      opacity: 1;
+
+      pointer-events: auto;
+
+      visibility: visible;
+    }
+
+    .modal-topbar {
+      display: flex;
+
+      align-items: center;
+
+      justify-content: space-between;
+
+      padding:
+        calc(0.75rem + env(safe-area-inset-top))
+        1.1rem
+        0.75rem;
+
+      border-bottom: 1px solid var(--border);
+
+      gap: 1rem;
+
+      flex-shrink: 0;
+
+      background: rgba(13, 17, 23, 0.96);
+
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .modal-title {
+      font:
+        0.78rem
+        ui-monospace,
+        monospace;
+
+      color: var(--text);
+
+      white-space: nowrap;
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+      min-width: 0;
+    }
+
+    .modal-controls {
+      display: flex;
+
+      align-items: center;
+
+      gap: 0.45rem;
+
+      flex-shrink: 0;
+    }
+
+    .modal-btn {
+      font:
+        0.65rem
+        ui-monospace,
+        monospace;
+
+      padding: 0.42rem 0.72rem;
+
+      border: 1px solid var(--border);
+
+      background: rgba(13, 17, 23, 0.92);
+
+      color: var(--text);
+
+      cursor: pointer;
+
+      border-radius: var(--radius);
+
+      text-decoration: none;
+
+      white-space: nowrap;
+
+      min-height: 34px;
+
+      display: inline-flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      touch-action: manipulation;
+    }
+
+    .modal-btn:hover {
+      border-color: var(--accent);
+
+      color: var(--accent);
+    }
+
+    .modal-close {
+      color: var(--red);
+
+      border-color:
+        rgba(248, 81, 73, 0.3);
+    }
+
+    .modal-close:hover {
+      border-color: var(--red);
+
+      color: var(--red);
+    }
+
+    .modal-body {
+      flex: 1;
+
+      min-height: 0;
+
+      overflow: auto;
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      padding: 1rem;
+
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .viewer {
+      width: min(1100px, 100%);
+
+      height: calc(100vh - 90px);
+
+      min-height: 450px;
+    }
+
+    /* Native PDF viewer */
+
+    .viewer-native {
+      width: 100%;
+      height: 100%;
+
+      border: 1px solid var(--border);
+
+      background: #ffffff;
+
+      display: block;
+    }
+
+    /* PDF.js viewer */
+
+    #pdf-js-viewer {
+      display: none;
+
+      width: 100%;
+
+      min-height: 100%;
+
+      background:
+        #11161d;
+    }
+
+    #pdf-js-viewer.active {
+      display: block;
+    }
+
+    .pdf-page {
+      display: block;
+
+      width: min(100%, 1000px);
+
+      height: auto;
+
+      margin:
+        0 auto 1rem;
+
+      background: #ffffff;
+
+      box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .pdf-loading {
+      min-height: 50vh;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      color: var(--muted);
+
+      font:
+        0.75rem
+        ui-monospace,
+        monospace;
+
+      text-align: center;
+
+      padding: 2rem;
+    }
+
+    .pdf-error {
+      min-height: 50vh;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      flex-direction: column;
+
+      gap: 1rem;
+
+      color: var(--muted);
+
+      font:
+        0.75rem
+        ui-monospace,
+        monospace;
+
+      text-align: center;
+
+      padding: 2rem;
+    }
+
+    .pdf-error strong {
+      color: var(--red);
+    }
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @media (max-width: 700px) {
+
+      .topbar {
+        padding:
+          calc(0.8rem + env(safe-area-inset-top))
+          1rem
+          0.8rem;
+      }
+
+      .status {
+        display: none;
+      }
+
+      .progress-section {
+        padding:
+          0.65rem
+          1rem
+          0.7rem;
+      }
+
+      main {
+        padding:
+          2.3rem
+          1rem
+          4rem;
+      }
+
+      .page-head {
+        margin-bottom: 2rem;
+      }
+
+      .page-head h1 {
+        font-size: 1.8rem;
+      }
+
+      .page-head p {
+        font-size: 0.9rem;
+      }
+
+      section.block {
+        margin-top: 2rem;
+      }
+
+      .file-list-head,
+      .file-row {
+        grid-template-columns:
+          minmax(0, 1fr)
+          auto;
+      }
+
+      .file-list-head span:nth-child(2),
+      .file-row .file-meta {
+        display: none;
+      }
+
+      .file-list-head {
+        padding:
+          0.55rem
+          0.8rem;
+      }
+
+      .file-row {
+        padding:
+          0.8rem;
+      }
+
+      .file-name-cell {
+        gap: 0.65rem;
+      }
+
+      .file-icon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .fname {
+        font-size: 0.78rem;
+      }
+
+      .fmeta {
+        font-size: 0.6rem;
+      }
+
+      .actions {
+        gap: 0.3rem;
+      }
+
+      .icon-btn {
+        width: 34px;
+        height: 34px;
+      }
+
+      footer {
+        padding:
+          0
+          1rem
+          calc(2rem + env(safe-area-inset-bottom));
+
+        flex-direction: column;
+      }
+
+      .modal-topbar {
+        padding:
+          calc(0.65rem + env(safe-area-inset-top))
+          0.75rem
+          0.65rem;
+      }
+
+      .modal-controls {
+        gap: 0.3rem;
+      }
+
+      .modal-btn {
+        min-height: 36px;
+
+        padding:
+          0.4rem
+          0.6rem;
+      }
+
+      .modal-body {
+        padding:
+          0.5rem
+          0.5rem
+          calc(0.5rem + env(safe-area-inset-bottom));
+      }
+
+      .viewer {
+        height:
+          calc(100dvh - 80px);
+
+        min-height: 0;
+
+        width: 100%;
+      }
+
+      .pdf-page {
+        width: 100%;
+
+        margin-bottom: 0.6rem;
+      }
+    }
+
+    /* Very small phones */
+
+    @media (max-width: 420px) {
+
+      .brand {
+        font-size: 0.84rem;
+      }
+
+      .page-head h1 {
+        font-size: 1.6rem;
+      }
+
+      .modal-title {
+        max-width: 42vw;
+      }
+
+      .modal-btn {
+        font-size: 0.58rem;
+      }
+    }
+
+    /* =========================================================
+       REDUCED MOTION
+       ========================================================= */
+
+    @media (prefers-reduced-motion: reduce) {
+
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<canvas id="physics-bg" aria-hidden="true"></canvas>
+  <canvas
+    id="physics-bg"
+    aria-hidden="true"
+  ></canvas>
 
-<header class="topbar">
+  <!-- =======================================================
+       TOP BAR
+       ======================================================= -->
 
-  <div class="brand">
-    <span class="mark">◈</span>
-    <b>notes\</b>
-    <span class="slash">/</span>
-  </div>
+  <header class="topbar">
 
-  <div class="status">
-    <span class="dot"></span>
-    <span>local project</span>
-  </div>
+    <div class="brand">
+      <span class="mark">◈</span>
+      <b>notes\</b>
+      <span class="slash">/</span>
+    </div>
 
-</header>
+    <div class="status">
+      <span class="dot"></span>
+      <span>local project</span>
+    </div>
 
-<!-- =========================================================
-     QUANTUM FIELD THEORY 1 PROGRESS
-     ========================================================= -->
+  </header>
 
-<div class="progress-section">
+  <!-- =======================================================
+       PROGRESS
+       ======================================================= -->
 
-  <div class="progress-info">
-    <span class="progress-title">Quantum Field Theory 1</span>
-    <span class="progress-percent">1%</span>
-  </div>
+  <div class="progress-section">
 
-  <div
-    class="progress-track"
-    role="progressbar"
-    aria-valuemin="0"
-    aria-valuemax="100"
-    aria-valuenow="1"
-    aria-label="Quantum Field Theory 1 progress"
-  >
-    <div class="progress-fill"></div>
-  </div>
+    <div class="progress-info">
 
-</div>
+      <span class="progress-title">
+        Quantum Field Theory 1
+      </span>
 
-<main>
-
-  <div class="page-head">
-
-    <h1>
-      <span class="mark">⌂</span>
-      Notes
-    </h1>
-
-    <p>
-      A collection of mathematics and physics notes, drafts, references,
-      and related study material.
-    </p>
-
-  </div>
-
-  <section class="block">
-
-    <div class="block-head">
-
-      <h2>
-        PDF notes
-        <span class="count">1</span>
-      </h2>
-
-      <span
-        class="mono"
-        style="font-size:.68rem;color:var(--muted)"
-      >
-        ./
+      <span class="progress-percent">
+        1%
       </span>
 
     </div>
 
-    <div class="file-list">
+    <div
+      class="progress-track"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="1"
+      aria-label="Quantum Field Theory 1 progress"
+    >
 
-      <div class="file-list-head">
-        <span>name</span>
-        <span>type</span>
-        <span>action</span>
-      </div>
-
-      <!-- Only this project PDF is exposed by the page. -->
-
-      <div
-        class="file-row"
-        data-pdf="QFT_1.pdf"
-        tabindex="0"
-        role="button"
-        aria-label="Open QFT_1.pdf"
-      >
-
-        <div class="file-name-cell">
-
-          <div class="file-icon">
-            <span class="ext">PDF</span>
-          </div>
-
-          <div class="file-name-text">
-
-            <div class="fname">
-              QFT_1.pdf
-            </div>
-
-            <div class="fmeta">
-              local project file
-            </div>
-
-          </div>
-
-        </div>
-
-        <div class="file-meta">
-          PDF
-        </div>
-
-        <div class="actions">
-
-          <button
-            class="icon-btn view-btn"
-            type="button"
-            title="View"
-            aria-label="View QFT_1.pdf"
-          >
-            ↗
-          </button>
-
-          <a
-            class="icon-btn"
-            href="QFT_1.pdf"
-            download
-            title="Download"
-            aria-label="Download QFT_1.pdf"
-          >
-            ↓
-          </a>
-
-        </div>
-
-      </div>
+      <div class="progress-fill"></div>
 
     </div>
 
-  </section>
+  </div>
 
-</main>
+  <!-- =======================================================
+       MAIN
+       ======================================================= -->
 
-<footer>
+  <main>
 
-  <span>
-    1 file available
-  </span>
+    <div class="page-head">
 
-  <span>
-    view / download only
-  </span>
+      <h1>
+        <span class="mark">⌂</span>
+        Notes
+      </h1>
 
-</footer>
+      <p>
+        A collection of mathematics and physics notes, drafts,
+        references, and related study material.
+      </p>
 
-<!-- =========================================================
-     PDF MODAL
-     ========================================================= -->
+    </div>
 
-<div
-  id="modal"
-  role="dialog"
-  aria-modal="true"
-  aria-label="PDF viewer"
->
+    <section class="block">
 
-  <div class="modal-topbar">
+      <div class="block-head">
 
-    <span id="modal-title" class="modal-title">
-      QFT_1.pdf
+        <h2>
+
+          PDF notes
+
+          <span class="count">
+            1
+          </span>
+
+        </h2>
+
+        <span
+          class="mono"
+          style="
+            font-size:.68rem;
+            color:var(--muted);
+          "
+        >
+          ./
+        </span>
+
+      </div>
+
+      <div class="file-list">
+
+        <div class="file-list-head">
+
+          <span>
+            name
+          </span>
+
+          <span>
+            type
+          </span>
+
+          <span>
+            action
+          </span>
+
+        </div>
+
+        <!-- =================================================
+             PDF ROW
+             ================================================= -->
+
+        <div
+          class="file-row"
+          data-pdf="QFT_1.pdf"
+          tabindex="0"
+          role="button"
+          aria-label="Open QFT_1.pdf"
+        >
+
+          <div class="file-name-cell">
+
+            <div class="file-icon">
+
+              <span class="ext">
+                PDF
+              </span>
+
+            </div>
+
+            <div class="file-name-text">
+
+              <div class="fname">
+                QFT_1.pdf
+              </div>
+
+              <div class="fmeta">
+                local project file
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="file-meta">
+            PDF
+          </div>
+
+          <div class="actions">
+
+            <button
+              class="icon-btn view-btn"
+              type="button"
+              title="View"
+              aria-label="View QFT_1.pdf"
+            >
+              ↗
+            </button>
+
+            <a
+              class="icon-btn"
+              href="QFT_1.pdf"
+              download
+              title="Download"
+              aria-label="Download QFT_1.pdf"
+            >
+              ↓
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- =======================================================
+       FOOTER
+       ======================================================= -->
+
+  <footer>
+
+    <span>
+      1 file available
     </span>
 
-    <div class="modal-controls">
+    <span>
+      view / download only
+    </span>
 
-      <a
-        class="modal-btn"
-        href="QFT_1.pdf"
-        download
-      >
-        download
-      </a>
+  </footer>
 
-      <button
-        id="modal-close"
-        class="modal-btn modal-close"
-        type="button"
+  <!-- =======================================================
+       PDF MODAL
+       ======================================================= -->
+
+  <div
+    id="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="PDF viewer"
+  >
+
+    <div class="modal-topbar">
+
+      <span
+        id="modal-title"
+        class="modal-title"
       >
-        close
-      </button>
+        QFT_1.pdf
+      </span>
+
+      <div class="modal-controls">
+
+        <a
+          id="modal-download"
+          class="modal-btn"
+          href="QFT_1.pdf"
+          download
+        >
+          download
+        </a>
+
+        <button
+          id="modal-close"
+          class="modal-btn modal-close"
+          type="button"
+        >
+          close
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="viewer">
+
+        <!-- Native viewer -->
+        <iframe
+          id="native-pdf-viewer"
+          class="viewer-native"
+          src="QFT_1.pdf"
+          title="QFT_1.pdf"
+          loading="lazy"
+        ></iframe>
+
+        <!-- PDF.js viewer -->
+        <div
+          id="pdf-js-viewer"
+          aria-label="PDF.js viewer"
+        ></div>
+
+      </div>
 
     </div>
 
   </div>
 
-  <div class="modal-body">
+  <!-- =======================================================
+       PDF.JS
+       =======================================================
 
-    <div class="viewer">
+       PDF.js is loaded only for browsers where native
+       embedded PDF rendering is unreliable, especially
+       mobile browsers such as iOS Safari.
+       ======================================================= -->
 
-      <iframe
-        src="QFT_1.pdf"
-        title="QFT_1.pdf"
-      ></iframe>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs"
+    type="module"
+  ></script>
 
-    </div>
+  <script>
+    "use strict";
 
-  </div>
+    /* =========================================================
+       CONFIG
+       ========================================================= */
 
-</div>
+    const PDF_FILE = "QFT_1.pdf";
 
-<script>
-"use strict";
+    /*
+      PDF.js worker.
 
-/*
-  Local project structure:
+      The library is imported as an ES module below.
+      We keep the worker URL compatible with the same version.
+    */
+    const PDFJS_VERSION = "4.4.168";
 
-    index.html
-    QFT_1.pdf
+    /* =========================================================
+       DOM
+       ========================================================= */
 
-  No:
+    const modal =
+      document.getElementById("modal");
 
-    - file picker
-    - folder picker
-    - fetch()
-    - upload
-    - network file source
-    - filesystem scan
-*/
+    const closeButton =
+      document.getElementById("modal-close");
 
-const modal = document.getElementById("modal");
-const closeButton = document.getElementById("modal-close");
-const row = document.querySelector(".file-row[data-pdf]");
-const viewButton = document.querySelector(".view-btn");
+    const row =
+      document.querySelector(".file-row[data-pdf]");
 
-function openPdf(){
-  modal.classList.add("open");
-}
+    const viewButton =
+      document.querySelector(".view-btn");
 
-function closePdf(){
-  modal.classList.remove("open");
-}
+    const nativeViewer =
+      document.getElementById("native-pdf-viewer");
 
-viewButton.addEventListener("click", openPdf);
+    const pdfJsViewer =
+      document.getElementById("pdf-js-viewer");
 
-row.addEventListener("dblclick", openPdf);
+    const modalTitle =
+      document.getElementById("modal-title");
 
-row.addEventListener("keydown", (event) => {
+    const modalDownload =
+      document.getElementById("modal-download");
 
-  if(event.key === "Enter" || event.key === " "){
-    event.preventDefault();
-    openPdf();
-  }
+    /* =========================================================
+       STATE
+       ========================================================= */
 
-});
+    let previousBodyOverflow = "";
 
-closeButton.addEventListener("click", closePdf);
+    let pdfJsModule = null;
 
-modal.addEventListener("click", (event) => {
+    let pdfRenderingStarted = false;
 
-  if(event.target === modal){
-    closePdf();
-  }
+    /* =========================================================
+       MOBILE DETECTION
+       ========================================================= */
 
-});
-
-document.addEventListener("keydown", (event) => {
-
-  if(event.key === "Escape"){
-    closePdf();
-  }
-
-});
-
-/* =========================================================
-   PHYSICS BACKGROUND
-   Equations + Feynman diagrams
-   ========================================================= */
-
-const canvas = document.getElementById("physics-bg");
-const ctx = canvas.getContext("2d");
-
-let width = 0;
-let height = 0;
-
-const equationText = [
-
-  "[ i γ^μ ∂_μ − m ] ψ = 0",
-
-  "E² = p²c² + m²c⁴",
-
-  "ℒ = −¼ F_μν F^μν",
-
-  "∂_μ F^μν = j^ν",
-
-  "□φ + m²φ = 0",
-
-  "Z = ∫ Dφ exp(iS[φ])",
-
-  "β = v / c",
-
-  "Δx Δp ≥ ℏ / 2",
-
-  "G_μν(x−y)",
-
-  "α = e² / 4π ε₀ ℏ c"
-
-];
-
-function resize(){
-
-  const dpr = Math.min(
-    window.devicePixelRatio || 1,
-    2
-  );
-
-  width = window.innerWidth;
-  height = window.innerHeight;
-
-  canvas.width = Math.floor(width * dpr);
-  canvas.height = Math.floor(height * dpr);
-
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
-
-  ctx.setTransform(
-    dpr,
-    0,
-    0,
-    dpr,
-    0,
-    0
-  );
-
-}
-
-window.addEventListener("resize", resize);
-
-resize();
-
-function drawEquation(
-  text,
-  x,
-  y,
-  size,
-  alpha,
-  rotation
-){
-
-  ctx.save();
-
-  ctx.translate(x,y);
-  ctx.rotate(rotation);
-
-  ctx.font =
-    `${size}px Georgia, "Times New Roman", serif`;
-
-  ctx.fillStyle =
-    `rgba(150,190,235,${alpha})`;
-
-  ctx.fillText(text,0,0);
-
-  ctx.restore();
-
-}
-
-function drawPhotonLine(
-  x1,
-  y1,
-  x2,
-  y2,
-  segments,
-  alpha
-){
-
-  const dx = x2-x1;
-  const dy = y2-y1;
-
-  const length = Math.hypot(dx,dy);
-
-  const nx = -dy / length;
-  const ny = dx / length;
-
-  const steps =
-    Math.max(
-      8,
-      Math.floor(length / 7)
-    );
-
-  const amplitude = 3;
-
-  ctx.beginPath();
-
-  for(let i=0;i<=steps;i++){
-
-    const t = i / steps;
-
-    const x =
-      x1 + dx * t;
-
-    const y =
-      y1 + dy * t;
-
-    const wave =
-      Math.sin(
-        t * segments * Math.PI * 2
-      ) * amplitude;
-
-    const px =
-      x + nx * wave;
-
-    const py =
-      y + ny * wave;
-
-    if(i === 0){
-      ctx.moveTo(px,py);
-    }else{
-      ctx.lineTo(px,py);
+    function isMobileDevice() {
+      return (
+        window.matchMedia &&
+        window.matchMedia("(max-width: 700px)").matches
+      ) || (
+        /Android|iPhone|iPad|iPod/i.test(
+          navigator.userAgent
+        )
+      );
     }
 
-  }
+    /* =========================================================
+       MODAL
+       ========================================================= */
 
-  ctx.strokeStyle =
-    `rgba(188,140,255,${alpha})`;
+    function lockBodyScroll() {
+      previousBodyOverflow =
+        document.body.style.overflow;
 
-  ctx.lineWidth = 1.2;
+      document.body.style.overflow = "hidden";
+    }
 
-  ctx.stroke();
+    function unlockBodyScroll() {
+      document.body.style.overflow =
+        previousBodyOverflow;
+    }
 
-}
+    async function openPdf() {
 
-function drawFermionLine(
-  x1,
-  y1,
-  x2,
-  y2,
-  alpha,
-  arrow = true
-){
+      modal.classList.add("open");
 
-  ctx.beginPath();
+      lockBodyScroll();
 
-  ctx.moveTo(x1,y1);
-  ctx.lineTo(x2,y2);
+      modalTitle.textContent = PDF_FILE;
 
-  ctx.strokeStyle =
-    `rgba(110,180,255,${alpha})`;
+      modalDownload.href = PDF_FILE;
 
-  ctx.lineWidth = 1;
+      /*
+        Mobile browsers get PDF.js.
 
-  ctx.stroke();
+        Desktop browsers keep their native PDF iframe,
+        which is lighter and usually faster.
+      */
 
-  if(!arrow){
-    return;
-  }
+      if (isMobileDevice()) {
 
-  const angle =
-    Math.atan2(
-      y2-y1,
-      x2-x1
+        nativeViewer.style.display = "none";
+
+        await renderWithPdfJs();
+
+      } else {
+
+        nativeViewer.style.display = "block";
+
+      }
+
+      closeButton.focus();
+    }
+
+    function closePdf() {
+
+      modal.classList.remove("open");
+
+      unlockBodyScroll();
+
+      /*
+        We reset the PDF.js viewer content when closing.
+        This prevents duplicate canvases after repeated opens.
+      */
+
+      pdfJsViewer.innerHTML = "";
+
+      pdfRenderingStarted = false;
+    }
+
+    /* =========================================================
+       KEYBOARD
+       ========================================================= */
+
+    viewButton.addEventListener(
+      "click",
+      openPdf
     );
 
-  const size = 5;
-
-  ctx.beginPath();
+    row.addEventListener(
+      "dblclick",
+      openPdf
+    );
 
-  ctx.moveTo(
-    x2 - Math.cos(angle) * size,
-    y2 - Math.sin(angle) * size
-  );
+    row.addEventListener(
+      "keydown",
+      (event) => {
 
-  ctx.lineTo(
-    x2
-      - Math.cos(angle) * size
-      - Math.cos(angle-Math.PI/2) * 3,
-
-    y2
-      - Math.sin(angle) * size
-      - Math.sin(angle-Math.PI/2) * 3
-  );
-
-  ctx.lineTo(
-    x2
-      - Math.cos(angle) * size
-      - Math.cos(angle+Math.PI/2) * 3,
-
-    y2
-      - Math.sin(angle) * size
-      - Math.sin(angle+Math.PI/2) * 3
-  );
-
-  ctx.closePath();
-
-  ctx.fillStyle =
-    `rgba(110,180,255,${alpha})`;
-
-  ctx.fill();
-
-}
-
-function drawVertex(
-  x,
-  y,
-  alpha
-){
-
-  ctx.beginPath();
-
-  ctx.arc(
-    x,
-    y,
-    2.2,
-    0,
-    Math.PI * 2
-  );
-
-  ctx.fillStyle =
-    `rgba(230,237,243,${alpha})`;
-
-  ctx.fill();
-
-}
-
-function drawFeynmanVertex(
-  cx,
-  cy,
-  scale,
-  alpha,
-  phase
-){
-
-  const leftX =
-    cx - 70 * scale;
-
-  const rightX =
-    cx + 70 * scale;
-
-  const topX =
-    cx;
-
-  const topY =
-    cy - 62 * scale;
-
-  const bottomY =
-    cy + 62 * scale;
-
-  /* Incoming/outgoing fermion lines */
-
-  drawFermionLine(
-    leftX,
-    cy,
-    cx,
-    cy,
-    alpha
-  );
-
-  drawFermionLine(
-    cx,
-    cy,
-    rightX,
-    cy,
-    alpha
-  );
-
-  /* Photon line */
-
-  drawPhotonLine(
-    cx,
-    topY,
-    cx,
-    cy,
-    7,
-    alpha *
-      (
-        .72 +
-        .12 * Math.sin(phase)
-      )
-  );
-
-  /* Second short photon leg */
-
-  drawPhotonLine(
-    cx,
-    cy,
-    cx + 44 * scale,
-    bottomY * .65 + cy * .35,
-    6,
-    alpha * .55
-  );
-
-  drawVertex(
-    cx,
-    cy,
-    alpha
-  );
-
-}
-
-function drawLoop(
-  cx,
-  cy,
-  scale,
-  alpha
-){
+        if (
+          event.key === "Enter" ||
+          event.key === " "
+        ) {
 
-  ctx.beginPath();
+          event.preventDefault();
 
-  ctx.ellipse(
-    cx,
-    cy,
-    62 * scale,
-    30 * scale,
-    0,
-    0,
-    Math.PI * 2
-  );
+          openPdf();
+        }
 
-  ctx.strokeStyle =
-    `rgba(110,180,255,${alpha})`;
+      }
+    );
 
-  ctx.lineWidth = 1;
+    closeButton.addEventListener(
+      "click",
+      closePdf
+    );
 
-  ctx.stroke();
+    modal.addEventListener(
+      "click",
+      (event) => {
 
-  /* Photon propagator crossing the loop */
+        if (event.target === modal) {
+          closePdf();
+        }
 
-  drawPhotonLine(
-    cx - 88 * scale,
-    cy,
-    cx + 88 * scale,
-    cy,
-    11,
-    alpha * .7
-  );
+      }
+    );
 
-  drawVertex(
-    cx - 62 * scale,
-    cy,
-    alpha * .85
-  );
+    document.addEventListener(
+      "keydown",
+      (event) => {
 
-  drawVertex(
-    cx + 62 * scale,
-    cy,
-    alpha * .85
-  );
+        if (event.key === "Escape") {
+          closePdf();
+        }
 
-}
+      }
+    );
 
-function drawBackground(time){
+    /* =========================================================
+       PDF.JS
+       ========================================================= */
 
-  ctx.clearRect(
-    0,
-    0,
-    width,
-    height
-  );
+    async function loadPdfJs() {
 
-  const t =
-    time * 0.00035;
+      if (pdfJsModule) {
+        return pdfJsModule;
+      }
 
-  /* Soft grid */
+      /*
+        Dynamic import makes the fallback completely optional.
 
-  ctx.strokeStyle =
-    "rgba(88,166,255,.035)";
+        If PDF.js cannot load, the page still works because
+        the native iframe remains available on desktop.
+      */
 
-  ctx.lineWidth = 1;
+      try {
 
-  const grid = 72;
+        pdfJsModule = await import(
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs"
+        );
 
-  for(
-    let x = 0;
-    x < width;
-    x += grid
-  ){
+        const workerUrl =
+          `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.mjs`;
 
-    ctx.beginPath();
+        pdfJsModule.GlobalWorkerOptions.workerSrc =
+          workerUrl;
 
-    ctx.moveTo(x,0);
-    ctx.lineTo(x,height);
+        return pdfJsModule;
 
-    ctx.stroke();
+      } catch (error) {
 
-  }
+        console.error(
+          "Unable to load PDF.js:",
+          error
+        );
 
-  for(
-    let y = 0;
-    y < height;
-    y += grid
-  ){
+        return null;
+      }
+    }
 
-    ctx.beginPath();
+    async function renderWithPdfJs() {
 
-    ctx.moveTo(0,y);
-    ctx.lineTo(width,y);
+      if (pdfRenderingStarted) {
+        return;
+      }
 
-    ctx.stroke();
+      pdfRenderingStarted = true;
 
-  }
+      pdfJsViewer.classList.add("active");
 
-  /* Equations distributed across the page */
+      pdfJsViewer.innerHTML = `
+        <div class="pdf-loading">
+          Loading PDF...
+        </div>
+      `;
 
-  const positions = [
+      const pdfjsLib =
+        await loadPdfJs();
+
+      if (!pdfjsLib) {
 
-    [.08,.22,-.018],
+        pdfJsViewer.innerHTML = `
+          <div class="pdf-error">
 
-    [.63,.18,.012],
+            <strong>
+              PDF renderer unavailable
+            </strong>
 
-    [.34,.42,-.009],
+            <span>
+              Use the download button to open the document.
+            </span>
 
-    [.76,.48,.014],
+          </div>
+        `;
 
-    [.10,.71,.009],
+        return;
+      }
 
-    [.58,.76,-.012],
+      try {
 
-    [.82,.82,.008],
+        const loadingTask =
+          pdfjsLib.getDocument(PDF_FILE);
 
-    [.42,.16,-.014],
+        const pdf =
+          await loadingTask.promise;
 
-    [.25,.88,.006],
+        pdfJsViewer.innerHTML = "";
 
-    [.90,.33,-.009]
+        /*
+          Render every page.
 
-  ];
+          Pages are rendered individually to canvas.
+          This works very well on mobile because there is
+          no dependence on the browser's embedded PDF plugin.
+        */
 
-  positions.forEach((p,i)=>{
+        for (
+          let pageNumber = 1;
+          pageNumber <= pdf.numPages;
+          pageNumber++
+        ) {
 
-    const x =
-      width * p[0];
+          const page =
+            await pdf.getPage(pageNumber);
 
-    const y =
-      height * p[1];
+          const containerWidth =
+            pdfJsViewer.clientWidth ||
+            window.innerWidth;
 
-    const drift =
-      Math.sin(
-        t * (.5 + i * .07) + i
-      ) * 5;
+          /*
+            We use a scale based on available width.
 
-    const alpha =
-      .075 +
-      .018 *
-      Math.sin(
-        t * (1.2 + i * .11) + i
+            The 1.25 multiplier gives readable text on
+            high-density smartphone screens.
+          */
+
+          const baseViewport =
+            page.getViewport({
+              scale: 1
+            });
+
+          const scale =
+            (containerWidth /
+              baseViewport.width) *
+            Math.min(
+              window.devicePixelRatio || 1,
+              2
+            );
+
+          const viewport =
+            page.getViewport({
+              scale
+            });
+
+          const canvas =
+            document.createElement("canvas");
+
+          const context =
+            canvas.getContext("2d", {
+              alpha: false
+            });
+
+          /*
+            CSS dimensions
+          */
+
+          const cssWidth =
+            viewport.width /
+            Math.min(
+              window.devicePixelRatio || 1,
+              2
+            );
+
+          const cssHeight =
+            viewport.height /
+            Math.min(
+              window.devicePixelRatio || 1,
+              2
+            );
+
+          canvas.className =
+            "pdf-page";
+
+          canvas.width =
+            Math.floor(viewport.width);
+
+          canvas.height =
+            Math.floor(viewport.height);
+
+          canvas.style.width =
+            `${cssWidth}px`;
+
+          canvas.style.height =
+            `${cssHeight}px`;
+
+          pdfJsViewer.appendChild(canvas);
+
+          await page.render({
+            canvasContext: context,
+            viewport
+          }).promise;
+        }
+
+      } catch (error) {
+
+        console.error(
+          "PDF rendering error:",
+          error
+        );
+
+        pdfJsViewer.innerHTML = `
+          <div class="pdf-error">
+
+            <strong>
+              Unable to render PDF
+            </strong>
+
+            <span>
+              Try the download button.
+            </span>
+
+          </div>
+        `;
+      }
+    }
+
+    /* =========================================================
+       PDF VIEWER RESIZE
+       =========================================================
+
+       Re-renders the PDF after a significant orientation/
+       viewport change on mobile.
+
+       This is particularly useful when rotating a phone.
+       ========================================================= */
+
+    let resizeTimer = null;
+
+    window.addEventListener(
+      "resize",
+      () => {
+
+        clearTimeout(resizeTimer);
+
+        resizeTimer = setTimeout(
+          async () => {
+
+            if (
+              modal.classList.contains("open") &&
+              isMobileDevice() &&
+              pdfRenderingStarted
+            ) {
+
+              pdfJsViewer.innerHTML = "";
+
+              pdfRenderingStarted = false;
+
+              await renderWithPdfJs();
+            }
+
+          },
+          300
+        );
+      }
+    );
+
+    /* =========================================================
+       PHYSICS BACKGROUND
+       ========================================================= */
+
+    const canvas =
+      document.getElementById("physics-bg");
+
+    const ctx =
+      canvas.getContext("2d");
+
+    let width = 0;
+    let height = 0;
+
+    const equationText = [
+      "[ i γ^μ ∂_μ − m ] ψ = 0",
+      "E² = p²c² + m²c⁴",
+      "ℒ = −¼ F_μν F^μν",
+      "∂_μ F^μν = j^ν",
+      "□φ + m²φ = 0",
+      "Z = ∫ Dφ exp(iS[φ])",
+      "β = v / c",
+      "Δx Δp ≥ ℏ / 2",
+      "G_μν(x−y)",
+      "α = e² / 4π ε₀ ℏ c"
+    ];
+
+    function resizeCanvas() {
+
+      const dpr =
+        Math.min(
+          window.devicePixelRatio || 1,
+          2
+        );
+
+      width =
+        window.innerWidth;
+
+      height =
+        window.innerHeight;
+
+      canvas.width =
+        Math.floor(
+          width * dpr
+        );
+
+      canvas.height =
+        Math.floor(
+          height * dpr
+        );
+
+      canvas.style.width =
+        width + "px";
+
+      canvas.style.height =
+        height + "px";
+
+      ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+      );
+    }
+
+    window.addEventListener(
+      "resize",
+      resizeCanvas
+    );
+
+    resizeCanvas();
+
+    function drawEquation(
+      text,
+      x,
+      y,
+      size,
+      alpha,
+      rotation
+    ) {
+
+      ctx.save();
+
+      ctx.translate(
+        x,
+        y
       );
 
-    drawEquation(
-      equationText[i],
-      x,
-      y + drift,
-      14 + (i % 3) * 2,
+      ctx.rotate(
+        rotation
+      );
+
+      ctx.font =
+        `${size}px Georgia, "Times New Roman", serif`;
+
+      ctx.fillStyle =
+        `rgba(150,190,235,${alpha})`;
+
+      ctx.fillText(
+        text,
+        0,
+        0
+      );
+
+      ctx.restore();
+    }
+
+    function drawPhotonLine(
+      x1,
+      y1,
+      x2,
+      y2,
+      segments,
+      alpha
+    ) {
+
+      const dx =
+        x2 - x1;
+
+      const dy =
+        y2 - y1;
+
+      const length =
+        Math.hypot(
+          dx,
+          dy
+        );
+
+      const nx =
+        -dy / length;
+
+      const ny =
+        dx / length;
+
+      const steps =
+        Math.max(
+          8,
+          Math.floor(
+            length / 7
+          )
+        );
+
+      const amplitude = 3;
+
+      ctx.beginPath();
+
+      for (
+        let i = 0;
+        i <= steps;
+        i++
+      ) {
+
+        const t =
+          i / steps;
+
+        const x =
+          x1 + dx * t;
+
+        const y =
+          y1 + dy * t;
+
+        const wave =
+          Math.sin(
+            t *
+            segments *
+            Math.PI *
+            2
+          ) *
+          amplitude;
+
+        const px =
+          x + nx * wave;
+
+        const py =
+          y + ny * wave;
+
+        if (i === 0) {
+          ctx.moveTo(
+            px,
+            py
+          );
+        } else {
+          ctx.lineTo(
+            px,
+            py
+          );
+        }
+      }
+
+      ctx.strokeStyle =
+        `rgba(188,140,255,${alpha})`;
+
+      ctx.lineWidth = 1.2;
+
+      ctx.stroke();
+    }
+
+    function drawFermionLine(
+      x1,
+      y1,
+      x2,
+      y2,
       alpha,
-      p[2]
+      arrow = true
+    ) {
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        x1,
+        y1
+      );
+
+      ctx.lineTo(
+        x2,
+        y2
+      );
+
+      ctx.strokeStyle =
+        `rgba(110,180,255,${alpha})`;
+
+      ctx.lineWidth = 1;
+
+      ctx.stroke();
+
+      if (!arrow) {
+        return;
+      }
+
+      const angle =
+        Math.atan2(
+          y2 - y1,
+          x2 - x1
+        );
+
+      const size = 5;
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        x2 -
+          Math.cos(angle) *
+          size,
+        y2 -
+          Math.sin(angle) *
+          size
+      );
+
+      ctx.lineTo(
+        x2 -
+          Math.cos(angle) *
+          size -
+          Math.cos(
+            angle - Math.PI / 2
+          ) * 3,
+
+        y2 -
+          Math.sin(angle) *
+          size -
+          Math.sin(
+            angle - Math.PI / 2
+          ) * 3
+      );
+
+      ctx.lineTo(
+        x2 -
+          Math.cos(angle) *
+          size -
+          Math.cos(
+            angle + Math.PI / 2
+          ) * 3,
+
+        y2 -
+          Math.sin(angle) *
+          size -
+          Math.sin(
+            angle + Math.PI / 2
+          ) * 3
+      );
+
+      ctx.closePath();
+
+      ctx.fillStyle =
+        `rgba(110,180,255,${alpha})`;
+
+      ctx.fill();
+    }
+
+    function drawVertex(
+      x,
+      y,
+      alpha
+    ) {
+
+      ctx.beginPath();
+
+      ctx.arc(
+        x,
+        y,
+        2.2,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fillStyle =
+        `rgba(230,237,243,${alpha})`;
+
+      ctx.fill();
+    }
+
+    function drawFeynmanVertex(
+      cx,
+      cy,
+      scale,
+      alpha,
+      phase
+    ) {
+
+      const leftX =
+        cx -
+        70 *
+        scale;
+
+      const rightX =
+        cx +
+        70 *
+        scale;
+
+      const topY =
+        cy -
+        62 *
+        scale;
+
+      const bottomY =
+        cy +
+        62 *
+        scale;
+
+      /* Fermion lines */
+
+      drawFermionLine(
+        leftX,
+        cy,
+        cx,
+        cy,
+        alpha
+      );
+
+      drawFermionLine(
+        cx,
+        cy,
+        rightX,
+        cy,
+        alpha
+      );
+
+      /* Photon line */
+
+      drawPhotonLine(
+        cx,
+        topY,
+        cx,
+        cy,
+        7,
+        alpha *
+        (
+          0.72 +
+          0.12 *
+          Math.sin(phase)
+        )
+      );
+
+      /* Second photon leg */
+
+      drawPhotonLine(
+        cx,
+        cy,
+        cx +
+          44 *
+          scale,
+        bottomY * 0.65 +
+          cy * 0.35,
+        6,
+        alpha * 0.55
+      );
+
+      drawVertex(
+        cx,
+        cy,
+        alpha
+      );
+    }
+
+    function drawLoop(
+      cx,
+      cy,
+      scale,
+      alpha
+    ) {
+
+      ctx.beginPath();
+
+      ctx.ellipse(
+        cx,
+        cy,
+        62 * scale,
+        30 * scale,
+        0,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.strokeStyle =
+        `rgba(110,180,255,${alpha})`;
+
+      ctx.lineWidth = 1;
+
+      ctx.stroke();
+
+      /* Photon propagator */
+
+      drawPhotonLine(
+        cx -
+          88 *
+          scale,
+        cy,
+        cx +
+          88 *
+          scale,
+        cy,
+        11,
+        alpha * 0.7
+      );
+
+      drawVertex(
+        cx -
+          62 *
+          scale,
+        cy,
+        alpha * 0.85
+      );
+
+      drawVertex(
+        cx +
+          62 *
+          scale,
+        cy,
+        alpha * 0.85
+      );
+    }
+
+    function drawBackground(time) {
+
+      ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+      );
+
+      const t =
+        time *
+        0.00035;
+
+      /* Soft grid */
+
+      ctx.strokeStyle =
+        "rgba(88,166,255,.035)";
+
+      ctx.lineWidth = 1;
+
+      const grid = 72;
+
+      for (
+        let x = 0;
+        x < width;
+        x += grid
+      ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+          x,
+          0
+        );
+
+        ctx.lineTo(
+          x,
+          height
+        );
+
+        ctx.stroke();
+      }
+
+      for (
+        let y = 0;
+        y < height;
+        y += grid
+      ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+          0,
+          y
+        );
+
+        ctx.lineTo(
+          width,
+          y
+        );
+
+        ctx.stroke();
+      }
+
+      /*
+        On very small screens we reduce the number of
+        background elements to improve scrolling/PDF
+        performance.
+      */
+
+      const mobile =
+        width <= 700;
+
+      const positions = mobile
+        ? [
+            [.08, .22, -.018],
+            [.63, .18, .012],
+            [.34, .42, -.009],
+            [.76, .48, .014],
+            [.10, .71, .009],
+            [.82, .82, .008]
+          ]
+        : [
+            [.08, .22, -.018],
+            [.63, .18, .012],
+            [.34, .42, -.009],
+            [.76, .48, .014],
+            [.10, .71, .009],
+            [.58, .76, -.012],
+            [.82, .82, .008],
+            [.42, .16, -.014],
+            [.25, .88, .006],
+            [.90, .33, -.009]
+          ];
+
+      positions.forEach(
+        (p, i) => {
+
+          const x =
+            width *
+            p[0];
+
+          const y =
+            height *
+            p[1];
+
+          const drift =
+            Math.sin(
+              t *
+              (0.5 + i * 0.07) +
+              i
+            ) *
+            5;
+
+          const alpha =
+            0.075 +
+            0.018 *
+            Math.sin(
+              t *
+              (1.2 + i * 0.11) +
+              i
+            );
+
+          drawEquation(
+            equationText[i],
+            x,
+            y + drift,
+            14 +
+              (i % 3) * 2,
+            alpha,
+            p[2]
+          );
+
+        }
+      );
+
+      const a =
+        Math.min(
+          width,
+          height
+        );
+
+      /*
+        Feynman diagrams
+      */
+
+      if (!mobile) {
+
+        drawFeynmanVertex(
+          width * 0.18,
+          height * 0.28,
+          Math.max(
+            0.55,
+            a / 1200
+          ),
+          0.14,
+          t * 2
+        );
+
+        drawFeynmanVertex(
+          width * 0.84,
+          height * 0.26,
+          Math.max(
+            0.45,
+            a / 1450
+          ),
+          0.11,
+          t * 1.7 + 1
+        );
+
+        drawLoop(
+          width * 0.74,
+          height * 0.67,
+          Math.max(
+            0.5,
+            a / 1500
+          ),
+          0.10
+        );
+
+        drawLoop(
+          width * 0.27,
+          height * 0.78,
+          Math.max(
+            0.38,
+            a / 1750
+          ),
+          0.075
+        );
+
+      } else {
+
+        /*
+          One lighter diagram on mobile to reduce GPU
+          usage while the user is scrolling.
+        */
+
+        drawFeynmanVertex(
+          width * 0.82,
+          height * 0.20,
+          Math.max(
+            0.35,
+            a / 1900
+          ),
+          0.07,
+          t
+        );
+      }
+
+      requestAnimationFrame(
+        drawBackground
+      );
+    }
+
+    requestAnimationFrame(
+      drawBackground
     );
-
-  });
-
-  /* Feynman diagrams */
-
-  const a =
-    Math.min(width,height);
-
-  drawFeynmanVertex(
-    width * .18,
-    height * .28,
-    Math.max(.55,a/1200),
-    .14,
-    t * 2
-  );
-
-  drawFeynmanVertex(
-    width * .84,
-    height * .26,
-    Math.max(.45,a/1450),
-    .11,
-    t * 1.7 + 1
-  );
-
-  drawLoop(
-    width * .74,
-    height * .67,
-    Math.max(.5,a/1500),
-    .10
-  );
-
-  drawLoop(
-    width * .27,
-    height * .78,
-    Math.max(.38,a/1750),
-    .075
-  );
-
-  requestAnimationFrame(drawBackground);
-
-}
-
-requestAnimationFrame(drawBackground);
-
-</script>
+  </script>
 
 </body>
 </html>
-```
