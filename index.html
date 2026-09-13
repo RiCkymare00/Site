@@ -39,7 +39,6 @@ section.block{margin-top:2.6rem}.block-head{display:flex;align-items:center;just
 footer{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:0 1.5rem 3rem;font: .66rem ui-monospace,monospace;color:var(--muted);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 #modal{position:fixed;inset:0;z-index:2000;background:rgba(6,8,11,.96);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .18s}#modal.open{opacity:1;pointer-events:auto}
 .modal-topbar{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);gap:1rem;flex-shrink:0}.modal-title{font:.78rem ui-monospace,monospace;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modal-controls{display:flex;align-items:center;gap:.45rem;flex-shrink:0}.modal-btn{font:.65rem ui-monospace,monospace;padding:.35rem .65rem;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;border-radius:var(--radius)}.modal-btn:hover{border-color:var(--accent);color:var(--accent)}.modal-close{color:var(--red);border-color:rgba(248,81,73,.3)}.modal-body{flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:2.2rem 1rem 3rem;gap:1.2rem}.viewer{width:min(920px,94vw);display:flex;justify-content:center}.viewer img{display:block;max-width:100%;max-height:78vh;object-fit:contain;border:1px solid var(--border);box-shadow:0 6px 30px rgba(0,0,0,.5)}.viewer iframe{width:min(920px,94vw);height:78vh;border:1px solid var(--border);background:white}.source{width:min(920px,94vw);background:#0b0f14;color:var(--text-soft);border:1px solid var(--border);border-radius:6px;padding:1.25rem;font: .78rem/1.7 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:78vh}.unsupported{width:min(720px,92vw);padding:2rem;text-align:center;color:var(--muted);font: .78rem ui-monospace,monospace}.unsupported b{display:block;color:var(--text);font-size:.95rem;margin-bottom:.5rem}
-#folder-input{display:none}
 @media(max-width:700px){.topbar{padding:.9rem 1.2rem}.status{display:none}main{padding:2.6rem 1.2rem 4rem}.file-list-head,.file-row{grid-template-columns:minmax(0,1fr) 42px 72px}.file-list-head span:nth-child(2),.file-row .file-meta.size{display:none}.file-list-head span:nth-child(3){text-align:right}.file-list-head span:nth-child(4){text-align:right}.file-row{gap:.5rem}.fname{font-size:.8rem}.actions{gap:.2rem}.icon-btn{width:26px;height:26px}footer{padding:0 1.2rem 2.5rem;flex-direction:column}}
 </style>
 </head>
@@ -52,11 +51,9 @@ footer{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:0 1.5re
 <main>
   <div class="page-head">
     <h1><span class="mark">⌂</span> Project files</h1>
-    <p>Consultazione locale dei file del progetto. Il sito non modifica né carica i file: permette soltanto di visualizzarli e scaricarli.</p>
+    <p>Consultazione dei file presenti nella stessa cartella di questo HTML. Nessun selettore di file e nessun caricamento verso Internet: puoi soltanto visualizzare e scaricare i file del progetto.</p>
     <div class="toolbar">
-      <button class="btn primary" id="choose-folder">select project folder</button>
-      <button class="btn" id="refresh">refresh</button>
-      <a class="btn" id="download-all" href="#" download style="display:none">download selected</a>
+      <button class="btn primary" id="refresh">refresh project files</button>
     </div>
   </div>
   <section class="block">
@@ -64,12 +61,11 @@ footer{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:0 1.5re
     <div class="file-list">
       <div class="file-list-head"><span>name</span><span>size</span><span>modified</span><span>action</span></div>
       <div id="rows"></div>
-      <div id="empty" class="empty"><div class="big">□</div><p>No files detected.</p><p class="mono">The page first tries to read a standard directory listing from the project root. If the server does not expose one, use “select project folder”.</p></div>
+      <div id="empty" class="empty"><div class="big">□</div><p>No project files detected.</p><p class="mono">The page reads only the directory that contains this HTML file.</p></div>
     </div>
   </section>
 </main>
 <footer><span id="footer-note">local viewer</span><span>view / download only</span></footer>
-<input id="folder-input" type="file" webkitdirectory directory multiple>
 <div id="modal" role="dialog" aria-modal="true" aria-label="File viewer">
   <div class="modal-topbar"><span id="modal-title" class="modal-title">—</span><div class="modal-controls"><a id="modal-download" class="modal-btn" href="#" download>download</a><button id="modal-close" class="modal-btn modal-close">close</button></div></div>
   <div id="modal-body" class="modal-body"></div>
@@ -88,7 +84,6 @@ const modal = document.getElementById('modal');
 const modalBody = document.getElementById('modal-body');
 const modalTitle = document.getElementById('modal-title');
 const modalDownload = document.getElementById('modal-download');
-const folderInput = document.getElementById('folder-input');
 
 const ALLOWED = new Set([
   'pdf','png','jpg','jpeg','gif','webp','svg','bmp','avif',
@@ -146,55 +141,58 @@ function closeViewer(){modal.classList.remove('open');modalBody.innerHTML='';mod
 
 document.getElementById('modal-close').addEventListener('click',closeViewer);modal.addEventListener('click',e=>{if(e.target===modal)closeViewer()});window.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewer()});
 
-document.getElementById('choose-folder').addEventListener('click',()=>folderInput.click());
-folderInput.addEventListener('change',()=>{
-  resetRecords();
-  for(const file of folderInput.files){
-    if(!ALLOWED.has(ext(file.name)))continue;
-    const path=file.webkitRelativePath || file.name;
-    addRecord({name:file.name,path,size:file.size,modified:file.lastModified,file,url:null});
-  }
-  pathLabel.textContent=folderInput.files[0]?.webkitRelativePath?.split('/')[0] ? `./${folderInput.files[0].webkitRelativePath.split('/')[0]}/` : './';
-  setStatus(records.length?`${records.length} local files loaded`:'folder loaded — no supported files','live');
-  render();
-});
-
 document.getElementById('refresh').addEventListener('click',scanProjectDirectory);
 
 async function scanProjectDirectory(){
   resetRecords();
+  setStatus('scanning current project folder…');
+
+  // IMPORTANT: this request is strictly relative to the same origin and directory
+  // as this HTML file. No remote URL, file picker, or upload mechanism is used.
   if(location.protocol==='file:'){
-    setStatus('browser security blocks automatic folder scanning — choose project folder','warn');
+    setStatus('serve this project with a local web server', 'warn');
+    pathLabel.textContent='./';
     render();
     return;
   }
-  setStatus('scanning project folder…');
+
   try{
-    const res=await fetch('./',{cache:'no-store',headers:{'Accept':'text/html,text/plain;q=.9,*/*;q=.1'}});
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
-    const html=await res.text();
-    const doc=new DOMParser().parseFromString(html,'text/html');
+    const base = new URL('./', location.href);
+    const res = await fetch(base.href, {cache:'no-store', credentials:'same-origin'});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html,'text/html');
     const links=[...doc.querySelectorAll('a[href]')];
-    const hrefs=links.map(a=>a.getAttribute('href')).filter(Boolean);
-    const candidates=[];
-    for(const href of hrefs){
-      if(href==='../'||href.startsWith('#')||href.endsWith('/'))continue;
+
+    for(const a of links){
+      const href=a.getAttribute('href');
+      if(!href || href==='../' || href.startsWith('#') || href.endsWith('/')) continue;
       try{
-        const u=new URL(href,location.href);
-        if(u.origin!==location.origin)continue;
-        const name=decodeURIComponent(u.pathname.split('/').pop()||'');
-        if(ALLOWED.has(ext(name)))candidates.push({name, path:name, url:u.href});
+        const u=new URL(href, base.href);
+        // Same origin + same directory only.
+        if(u.origin!==location.origin || u.pathname.slice(0, base.pathname.length)!==base.pathname) continue;
+        const name=decodeURIComponent(u.pathname.slice(base.pathname.length));
+        if(!name || name.includes('/')) continue;
+        if(name===location.pathname.split('/').pop()) continue;
+        if(ALLOWED.has(ext(name))) addRecord({name, path:name, url:u.href});
       }catch{}
     }
-    for(const f of candidates)addRecord(f);
+
     if(records.length){
-      pathLabel.textContent='./';setStatus(`${records.length} project files detected`,'live');render();return;
+      pathLabel.textContent='./';
+      setStatus(`${records.length} project files detected`,'live');
+    }else{
+      setStatus('no supported files in the project folder','warn');
     }
-    setStatus('directory listing unavailable — choose project folder','warn');render();
+    render();
   }catch(err){
-    setStatus('automatic scan unavailable — choose project folder','warn');render();
+    pathLabel.textContent='./';
+    setStatus('cannot read the project directory listing','warn');
+    render();
   }
 }
+
 
 // Lightweight animated background, visually inspired by the reference file.
 const canvas=document.getElementById('bg-canvas'),ctx=canvas.getContext('2d');let W=0,H=0;const nodes=[];
