@@ -1,653 +1,208 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>notes /</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>files /</title>
 <style>
-  :root {
-    --bg:          #0d1117;
-    --panel:       #161b22;
-    --panel-hover: #1c2333;
-    --border:      #30363d;
-    --border-soft: #21262d;
-    --text:        #e6edf3;
-    --text-soft:   #c9d1d9;
-    --muted:       #8b949e;
-    --accent:      #58a6ff;
-    --accent-dim:  rgba(88,166,255,0.10);
-    --purple:      #bc8cff;
-    --purple-dim:  rgba(188,140,255,0.12);
-    --red:         #f85149;
-    --red-dim:     rgba(248,81,73,0.12);
-    --green:       #3fb950;
-    --radius:      6px;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
-    font-size: 15px;
-    line-height: 1.5;
-    min-height: 100vh;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
-  a { color: inherit; }
-  button { font-family: inherit; }
-
-  /* ══ dynamic background: drifting formulas + Feynman diagrams ══ */
-  #bg-canvas {
-    position: fixed; inset: 0; z-index: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-  }
-  body::before {
-    content: '';
-    position: fixed; inset: 0; z-index: 0;
-    background-image: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(88,166,255,0.08), transparent 60%);
-    pointer-events: none;
-  }
-
-  header.topbar {
-    position: relative; z-index: 5;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.9rem 2.5rem;
-    border-bottom: 1px solid var(--border);
-    background: rgba(13,17,23,0.85);
-    backdrop-filter: blur(8px);
-    gap: 1rem;
-  }
-  .brand {
-    display: flex; align-items: center; gap: 0.55rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.95rem;
-    color: var(--text);
-    flex-shrink: 0;
-  }
-  .brand svg { color: var(--accent); flex-shrink: 0; }
-  .brand b { font-weight: 600; }
-  .brand .slash { color: var(--muted); }
-
-  .status-pill {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--muted);
-    display: flex; align-items: center; gap: 0.4rem;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .status-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-  .status-pill.live .dot { background: var(--green); }
-
-  main {
-    position: relative; z-index: 2;
-    max-width: 840px;
-    margin: 0 auto;
-    padding: 3.4rem 1.5rem 6rem;
-  }
-
-  .page-head { margin-bottom: 2.6rem; }
-  .page-head h1 {
-    font-family: 'Spectral', Georgia, serif;
-    font-size: 2.05rem; font-weight: 700; letter-spacing: -0.01em;
-    display: inline-flex; align-items: center; gap: 0.7rem;
-    color: var(--text);
-  }
-  .page-head h1 .cat-icon { color: var(--accent); flex-shrink: 0; }
-  .page-head p { margin-top: 0.65rem; color: var(--muted); font-size: 0.95rem; max-width: 58ch; }
-  .page-head p code { font-family: 'IBM Plex Mono', monospace; font-size: 0.86em; color: var(--purple); background: var(--purple-dim); padding: 0.1em 0.35em; border-radius: 4px; }
-
-  section.block { margin-top: 2.6rem; }
-  .block-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.9rem; gap: 1rem; flex-wrap: wrap; }
-  .block-head h2 { font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
-  .block-head h2 svg { color: var(--muted); }
-  .block-head .block-sub { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); }
-
-  .select-btn {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    display: flex; align-items: center; gap: 0.45rem;
-    padding: 0.42rem 0.85rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--panel);
-    color: var(--text-soft);
-    cursor: pointer;
-    transition: border-color .15s, color .15s, background .15s;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-  .select-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-
-  /* ── GitHub-style file table ── */
-  .file-list { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--panel); }
-  .file-list-head {
-    display: grid; grid-template-columns: 1fr 80px 100px 40px; gap: 1rem;
-    padding: 0.55rem 1.1rem; background: var(--border-soft); border-bottom: 1px solid var(--border);
-    font-family: 'IBM Plex Mono', monospace; font-size: 0.64rem; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase;
-  }
-  .file-list-head.sources { grid-template-columns: 1fr 70px 100px 40px; }
-  .file-list-head span:nth-child(2), .file-list-head span:nth-child(3) { text-align: right; }
-
-  .file-row {
-    display: grid; grid-template-columns: 1fr 80px 100px 40px; gap: 1rem; align-items: center;
-    padding: 0.75rem 1.1rem; border-bottom: 1px solid var(--border-soft); cursor: pointer; transition: background .12s;
-  }
-  .file-row.sources { grid-template-columns: 1fr 70px 100px 40px; }
-  .file-row:last-child { border-bottom: none; }
-  .file-row:hover { background: var(--panel-hover); }
-  .file-row:hover .fname { color: var(--accent); }
-
-  .file-name-cell { display: flex; align-items: center; gap: 0.8rem; min-width: 0; }
-  .file-icon {
-    width: 30px; height: 30px; border-radius: var(--radius);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    background: var(--border-soft); color: var(--muted); overflow: hidden; position: relative;
-  }
-  .file-icon img { width: 100%; height: 100%; object-fit: cover; }
-  .file-icon .ext { font-family: 'IBM Plex Mono', monospace; font-size: 0.55rem; font-weight: 600; color: var(--muted); }
-  .file-icon.pdf { color: var(--red); background: var(--red-dim); }
-  .file-icon.pdf .ext { color: var(--red); }
-  .file-icon.tex { color: var(--purple); background: var(--purple-dim); }
-  .file-icon.tex .ext { color: var(--purple); }
-  .file-icon.image { color: var(--green); }
-
-  .file-name-text { min-width: 0; }
-  .file-name-text .fname { font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 0.88rem; color: var(--text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .12s; }
-  .file-name-text .fmeta { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--muted); margin-top: 0.15rem; }
-
-  .file-pages, .file-date { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--muted); text-align: right; white-space: nowrap; }
-
-  .file-action { display: flex; justify-content: flex-end; }
-  .file-action button {
-    width: 26px; height: 26px; border: 1px solid transparent; background: transparent; color: var(--muted);
-    border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer;
-    transition: color .15s, border-color .15s;
-  }
-  .file-action button:hover { color: var(--accent); border-color: var(--border); background: var(--bg); }
-
-  .empty-state { padding: 2.6rem 1.5rem 2.2rem; text-align: center; color: var(--muted); }
-  .empty-state .cat-box { margin: 0 auto 1rem; width: 84px; height: 68px; color: var(--muted); }
-  .empty-state p { font-size: 0.88rem; color: var(--text-soft); }
-  .empty-state .mono { font-size: 0.72rem; margin-top: 0.4rem; color: var(--muted); }
-  .empty-state .mono code { color: var(--purple); }
-  .empty-state .select-btn { margin: 1rem auto 0; }
-
-  footer {
-    position: relative; z-index: 2; max-width: 840px; margin: 0 auto; padding: 0 1.5rem 3rem;
-    font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; color: var(--muted);
-    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-  }
-
-  /* ── MODAL ── */
-  #modal { position: fixed; inset: 0; z-index: 2000; background: rgba(6,8,11,0.96); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity .2s; }
-  #modal.open { opacity: 1; pointer-events: all; }
-  .modal-topbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.6rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .modal-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .modal-controls { display: flex; align-items: center; gap: 0.7rem; flex-shrink: 0; }
-  .modal-page-info { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); }
-  .modal-btn { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; padding: 0.35rem 0.8rem; border: 1px solid var(--border); background: transparent; color: var(--text); cursor: pointer; border-radius: var(--radius); transition: border-color .2s; }
-  .modal-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .modal-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .modal-close { color: var(--red); border-color: rgba(248,81,73,0.3); }
-  .modal-close:hover { border-color: var(--red); color: var(--red); }
-  .modal-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 2.4rem 1rem 3rem; gap: 1.4rem; }
-  .modal-page-wrap { position: relative; box-shadow: 0 6px 30px rgba(0,0,0,0.5); }
-  .modal-page-wrap canvas, .modal-page-wrap img { display: block; max-width: min(860px, 92vw); width: 100%; height: auto; }
-  .modal-page-num { position: absolute; bottom: 0.5rem; right: 0.7rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.55); padding: 0.15rem 0.4rem; border-radius: 2px; }
-  .modal-empty { color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 3rem; text-align: center; }
-  .modal-empty a { color: var(--accent); }
-  .modal-source {
-    width: min(760px, 92vw); background: #161b22; color: var(--text-soft); border: 1px solid var(--border); border-radius: 6px; padding: 1.4rem 1.6rem;
-    font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; line-height: 1.7; white-space: pre-wrap; word-break: break-word;
-    box-shadow: 0 6px 30px rgba(0,0,0,0.5);
-  }
-
-  @media (max-width: 640px) {
-    header.topbar { padding: 0.9rem 1.3rem; }
-    .status-pill { display: none; }
-    main { padding: 2.6rem 1.2rem 4rem; }
-    .file-list-head, .file-row { grid-template-columns: 1fr 60px 34px; }
-    .file-list-head span:nth-child(3), .file-date { display: none; }
-    footer { padding: 0 1.2rem 2.5rem; flex-direction: column; gap: 0.3rem; }
-  }
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel-hover:#1c2333; --border:#30363d;
+  --border-soft:#21262d; --text:#e6edf3; --text-soft:#c9d1d9; --muted:#8b949e;
+  --accent:#58a6ff; --accent-dim:rgba(88,166,255,.10); --purple:#bc8cff;
+  --purple-dim:rgba(188,140,255,.12); --red:#f85149; --red-dim:rgba(248,81,73,.12);
+  --green:#3fb950; --yellow:#d29922; --radius:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:Inter,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(88,166,255,.08),transparent 60%);pointer-events:none}
+#bg-canvas{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+a{color:inherit}
+button{font:inherit}
+.topbar{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:.9rem 2.5rem;border-bottom:1px solid var(--border);background:rgba(13,17,23,.85);backdrop-filter:blur(8px);gap:1rem}
+.brand{display:flex;align-items:center;gap:.55rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.95rem;flex-shrink:0}
+.brand .mark{color:var(--accent);font-weight:700}.brand b{font-weight:600}.brand .slash{color:var(--muted)}
+.status{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.68rem;color:var(--muted);display:flex;align-items:center;gap:.45rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.status .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0}.status.live .dot{background:var(--green)}.status.warn .dot{background:var(--yellow)}
+main{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:3.4rem 1.5rem 6rem}
+.page-head{margin-bottom:2.4rem}.page-head h1{font-family:Georgia,"Times New Roman",serif;font-size:2.05rem;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:.7rem;color:var(--text)}
+.page-head h1 .mark{color:var(--accent);font-family:ui-monospace,monospace}.page-head p{margin-top:.65rem;color:var(--muted);font-size:.94rem;max-width:76ch}
+.toolbar{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin-top:1rem}
+.btn{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.70rem;display:inline-flex;align-items:center;gap:.45rem;padding:.48rem .85rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);color:var(--text-soft);cursor:pointer;transition:border-color .15s,color .15s,background .15s;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}.btn.primary{border-color:rgba(88,166,255,.45);background:var(--accent-dim);color:var(--accent)}
+section.block{margin-top:2.6rem}.block-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;gap:1rem;flex-wrap:wrap}.block-head h2{font-size:1.05rem;font-weight:600;display:flex;align-items:center;gap:.5rem}.block-head h2 .count{font:600 .64rem ui-monospace,monospace;color:var(--muted);padding:.18rem .42rem;border:1px solid var(--border);border-radius:4px}
+.file-list{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
+.file-list-head,.file-row{display:grid;grid-template-columns:minmax(0,1fr) 90px 125px 82px;gap:1rem;align-items:center}.file-list-head{padding:.55rem 1.1rem;background:var(--border-soft);border-bottom:1px solid var(--border);font:600 .64rem ui-monospace,monospace;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}.file-list-head span:nth-child(n+2){text-align:right}
+.file-row{padding:.72rem 1.1rem;border-bottom:1px solid var(--border-soft);transition:background .12s}.file-row:last-child{border-bottom:none}.file-row:hover{background:var(--panel-hover)}
+.file-name-cell{display:flex;align-items:center;gap:.8rem;min-width:0}.file-icon{width:30px;height:30px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--border-soft);color:var(--muted);overflow:hidden}.file-icon.pdf{color:var(--red);background:var(--red-dim)}.file-icon.img{color:var(--green)}.file-icon.text{color:var(--purple);background:var(--purple-dim)}.ext{font:600 .55rem ui-monospace,monospace}.file-name-text{min-width:0}.fname{font:500 .88rem ui-monospace,monospace;color:var(--text-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fmeta{font:.65rem ui-monospace,monospace;color:var(--muted);margin-top:.15rem}.file-meta{font:.72rem ui-monospace,monospace;color:var(--muted);text-align:right;white-space:nowrap}.actions{display:flex;justify-content:flex-end;gap:.35rem}.icon-btn{width:28px;height:28px;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;cursor:pointer}.icon-btn:hover{color:var(--accent);border-color:var(--border);background:var(--bg)}
+.empty{padding:2.6rem 1.5rem 2.2rem;text-align:center;color:var(--muted)}.empty .big{font-size:2rem;margin-bottom:.55rem}.empty p{font-size:.88rem;color:var(--text-soft)}.empty .mono{font-size:.72rem;margin-top:.4rem;color:var(--muted)}
+footer{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:0 1.5rem 3rem;font: .66rem ui-monospace,monospace;color:var(--muted);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+#modal{position:fixed;inset:0;z-index:2000;background:rgba(6,8,11,.96);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .18s}#modal.open{opacity:1;pointer-events:auto}
+.modal-topbar{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);gap:1rem;flex-shrink:0}.modal-title{font:.78rem ui-monospace,monospace;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modal-controls{display:flex;align-items:center;gap:.45rem;flex-shrink:0}.modal-btn{font:.65rem ui-monospace,monospace;padding:.35rem .65rem;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;border-radius:var(--radius)}.modal-btn:hover{border-color:var(--accent);color:var(--accent)}.modal-close{color:var(--red);border-color:rgba(248,81,73,.3)}.modal-body{flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:2.2rem 1rem 3rem;gap:1.2rem}.viewer{width:min(920px,94vw);display:flex;justify-content:center}.viewer img{display:block;max-width:100%;max-height:78vh;object-fit:contain;border:1px solid var(--border);box-shadow:0 6px 30px rgba(0,0,0,.5)}.viewer iframe{width:min(920px,94vw);height:78vh;border:1px solid var(--border);background:white}.source{width:min(920px,94vw);background:#0b0f14;color:var(--text-soft);border:1px solid var(--border);border-radius:6px;padding:1.25rem;font: .78rem/1.7 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:78vh}.unsupported{width:min(720px,92vw);padding:2rem;text-align:center;color:var(--muted);font: .78rem ui-monospace,monospace}.unsupported b{display:block;color:var(--text);font-size:.95rem;margin-bottom:.5rem}
+#folder-input{display:none}
+@media(max-width:700px){.topbar{padding:.9rem 1.2rem}.status{display:none}main{padding:2.6rem 1.2rem 4rem}.file-list-head,.file-row{grid-template-columns:minmax(0,1fr) 42px 72px}.file-list-head span:nth-child(2),.file-row .file-meta.size{display:none}.file-list-head span:nth-child(3){text-align:right}.file-list-head span:nth-child(4){text-align:right}.file-row{gap:.5rem}.fname{font-size:.8rem}.actions{gap:.2rem}.icon-btn{width:26px;height:26px}footer{padding:0 1.2rem 2.5rem;flex-direction:column}}
 </style>
 </head>
 <body>
-
 <canvas id="bg-canvas"></canvas>
-
 <header class="topbar">
-  <div class="brand">
-    <svg class="cat-icon" width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="16" cy="17" r="9" stroke="currentColor" stroke-width="1.4"/>
-      <path d="M8 12 L6 5 L13 10 Z" fill="currentColor"/>
-      <path d="M24 12 L26 5 L19 10 Z" fill="currentColor"/>
-      <circle cx="12.5" cy="16.5" r="1.3" fill="currentColor"/>
-      <path d="M18.3 15.2 L20.7 17.6 M20.7 15.2 L18.3 17.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-      <path d="M15 20.5 Q16 21.5 17 20.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-    </svg>
-    <b>notes</b><span class="slash">/</span>
-  </div>
-  <div class="status-pill mono" id="status-pill"><span class="dot"></span><span id="status-text">no folder loaded yet</span></div>
+  <div class="brand"><span class="mark">◈</span><b>files</b><span class="slash">/</span></div>
+  <div id="status" class="status"><span class="dot"></span><span id="status-text">scanning project folder…</span></div>
 </header>
-
 <main>
   <div class="page-head">
-    <h1>
-      Notes
-      <svg class="cat-icon" width="34" height="30" viewBox="0 0 34 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect x="1" y="6" width="32" height="23" rx="3" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.5"/>
-        <circle cx="12" cy="14" r="6.5" stroke="currentColor" stroke-width="1.3"/>
-        <path d="M7 9 L5.5 3.5 L11 7.5 Z" fill="currentColor"/>
-        <path d="M17 9 L18.5 3.5 L13 7.5 Z" fill="currentColor"/>
-        <circle cx="10" cy="13.5" r="0.9" fill="currentColor"/>
-        <path d="M14 12.3 L15.8 14.1 M15.8 12.3 L14 14.1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
-      </svg>
-    </h1>
-    <p>A personal archive of notes — mathematics, physics, working drafts. Nothing here is hosted anywhere: click "select folder" below and pick your <code>notes/</code> or <code>latex/</code> folder from your computer. The browser reads every matching file inside it automatically — no filenames to type, no server, no upload to anywhere outside this page.</p>
+    <h1><span class="mark">⌂</span> Project files</h1>
+    <p>Consultazione locale dei file del progetto. Il sito non modifica né carica i file: permette soltanto di visualizzarli e scaricarli.</p>
+    <div class="toolbar">
+      <button class="btn primary" id="choose-folder">select project folder</button>
+      <button class="btn" id="refresh">refresh</button>
+      <a class="btn" id="download-all" href="#" download style="display:none">download selected</a>
+    </div>
   </div>
-
   <section class="block">
-    <div class="block-head">
-      <h2>
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 2h6l4 4v8H3V2z" stroke="currentColor" stroke-width="1.1"/><path d="M9 2v4h4" stroke="currentColor" stroke-width="1.1"/></svg>
-        Notes
-      </h2>
-      <button class="select-btn" id="notes-select-btn">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 4.5a1 1 0 0 1 1-1H6l1.5 1.8h6a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
-        select notes folder
-      </button>
-    </div>
-    <div class="file-list" id="notes-list-container">
-      <div class="file-list-head"><span>name</span><span>pages</span><span>modified</span><span></span></div>
-      <div id="notes-rows"></div>
-      <div class="empty-state" id="notes-empty">
-        <svg class="cat-box" viewBox="0 0 84 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x="6" y="10" width="72" height="52" rx="4" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 3" opacity="0.55"/>
-          <rect x="30" y="22" width="24" height="30" rx="2" stroke="currentColor" stroke-width="1.2" opacity="0.6"/>
-          <path d="M35 30h14M35 36h14M35 42h9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity="0.5"/>
-        </svg>
-        <p>No folder loaded yet.</p>
-        <p class="mono">Click below and choose your <code>notes/</code> folder — PDFs, images and documents inside it will be picked up automatically.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="block">
-    <div class="block-head">
-      <h2>
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        LaTeX sources
-      </h2>
-      <button class="select-btn" id="tex-select-btn">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 4.5a1 1 0 0 1 1-1H6l1.5 1.8h6a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
-        select latex folder
-      </button>
-    </div>
-    <div class="file-list" id="tex-list-container">
-      <div class="file-list-head sources"><span>name</span><span>type</span><span>modified</span><span></span></div>
-      <div id="tex-rows"></div>
-      <div class="empty-state" id="tex-empty">
-        <svg class="cat-box" viewBox="0 0 84 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x="6" y="10" width="72" height="52" rx="4" stroke="currentColor" stroke-width="1.3" stroke-dasharray="4 3" opacity="0.55"/>
-          <path d="M34 22 L24 36 L34 50" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
-          <path d="M50 22 L60 36 L50 50" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
-        </svg>
-        <p>No folder loaded yet.</p>
-        <p class="mono">Click below and choose your <code>latex/</code> folder — .tex, .sty, .cls and .bib files inside it will be picked up automatically.</p>
-      </div>
+    <div class="block-head"><h2>Files <span class="count" id="count">0</span></h2><span class="mono" id="path-label" style="font-size:.68rem;color:var(--muted)">./</span></div>
+    <div class="file-list">
+      <div class="file-list-head"><span>name</span><span>size</span><span>modified</span><span>action</span></div>
+      <div id="rows"></div>
+      <div id="empty" class="empty"><div class="big">□</div><p>No files detected.</p><p class="mono">The page first tries to read a standard directory listing from the project root. If the server does not expose one, use “select project folder”.</p></div>
     </div>
   </section>
 </main>
-
-<footer>
-  <span id="footer-note" class="mono">nothing loaded yet</span>
-</footer>
-
-<!-- Hidden folder pickers: "webkitdirectory" lets the user choose an entire folder,
-     and the browser hands back every file inside it — no manual filename entry,
-     no server, nothing leaves this page. -->
-<input type="file" id="notes-input" webkitdirectory directory multiple hidden>
-<input type="file" id="tex-input" webkitdirectory directory multiple hidden>
-
-<div id="modal" role="dialog" aria-modal="true">
-  <div class="modal-topbar">
-    <span class="modal-title" id="modal-title">—</span>
-    <div class="modal-controls">
-      <span class="modal-page-info" id="modal-page-info"></span>
-      <button class="modal-btn" id="modal-prev">◂</button>
-      <button class="modal-btn" id="modal-next">▸</button>
-      <button class="modal-btn modal-close" id="modal-close-btn">close</button>
-    </div>
-  </div>
-  <div class="modal-body" id="modal-body"></div>
+<footer><span id="footer-note">local viewer</span><span>view / download only</span></footer>
+<input id="folder-input" type="file" webkitdirectory directory multiple>
+<div id="modal" role="dialog" aria-modal="true" aria-label="File viewer">
+  <div class="modal-topbar"><span id="modal-title" class="modal-title">—</span><div class="modal-controls"><a id="modal-download" class="modal-btn" href="#" download>download</a><button id="modal-close" class="modal-btn modal-close">close</button></div></div>
+  <div id="modal-body" class="modal-body"></div>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+'use strict';
 
-/* ══════════════════════════════════════════════
-   HOW FILES GET IN
-   ------------------------------------------------
-   Nothing is hosted, fetched from a URL, or uploaded
-   to any server. The user clicks "select folder", the
-   browser's native folder picker opens, and once they
-   confirm, the File API hands this page the full list
-   of files inside — read straight from local disk, kept
-   only in this tab's memory. Filtering by extension and
-   sorting happens automatically; nobody types filenames.
-   ══════════════════════════════════════════════ */
-const NOTES_EXTS = ['pdf','png','jpg','jpeg','gif','webp','svg','doc','docx','ppt','pptx','md','txt'];
-const TEX_EXTS   = ['tex','sty','cls','bib','bst','dtx','ins'];
-
-let notesFiles = []; // { name, file, size, modified, url }
-let texFiles   = [];
-
-/* ── helpers ── */
-function extOf(name) { const p = name.split('.'); return p.length > 1 ? p.pop().toUpperCase() : '—'; }
-function kindOf(name) {
-  const ext = extOf(name).toLowerCase();
-  if (ext === 'pdf') return 'pdf';
-  if (['png','jpg','jpeg','gif','webp','svg'].includes(ext)) return 'image';
-  return 'other';
-}
-function fmtSize(bytes) {
-  if (bytes == null) return '';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
-  return (bytes/1024/1024).toFixed(1) + ' MB';
-}
-function timeAgo(iso) {
-  if (!iso) return '—';
-  const diff = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
-  if (diff < 60) return 'just now';
-  const mins = Math.floor(diff / 60); if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60); if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24); if (days < 30) return `${days}d ago`;
-  const months = Math.floor(days / 30); if (months < 12) return `${months}mo ago`;
-  const years = Math.floor(months / 12); return `${years}y ago`;
-}
-function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-/* ── turn a picked FileList into our internal file records ── */
-function filesFromFileList(fileList, exts, previousList) {
-  // Revoke old object URLs so we don't leak memory across re-selections.
-  (previousList || []).forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
-  return Array.from(fileList)
-    .filter(f => exts.includes(extOf(f.name).toLowerCase()))
-    .map(f => ({
-      name: f.name,
-      file: f,
-      size: f.size,
-      modified: f.lastModified ? new Date(f.lastModified).toISOString() : null,
-      url: URL.createObjectURL(f),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-/* ── rendering: Notes ── */
-const notesRows = document.getElementById('notes-rows');
-const notesEmpty = document.getElementById('notes-empty');
-const notesSelectBtn = document.getElementById('notes-select-btn');
-const notesInput = document.getElementById('notes-input');
-
-function renderNotes() {
-  notesRows.innerHTML = '';
-  notesEmpty.style.display = notesFiles.length ? 'none' : 'block';
-  for (const f of notesFiles) {
-    const kind = kindOf(f.name);
-    const row = document.createElement('div');
-    row.className = 'file-row';
-    const iconInner = kind === 'image' ? `<img src="${f.url}" alt="">` : `<span class="ext">${extOf(f.name)}</span>`;
-    row.innerHTML = `
-      <div class="file-name-cell">
-        <div class="file-icon ${kind}">${iconInner}</div>
-        <div class="file-name-text"><div class="fname">${escapeHtml(f.name)}</div><div class="fmeta">${fmtSize(f.size)}</div></div>
-      </div>
-      <div class="file-pages mono" data-pages>…</div>
-      <div class="file-date mono">${timeAgo(f.modified)}</div>
-      <div class="file-action"><button title="open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>`;
-    row.addEventListener('click', () => openFile(f, kind));
-    notesRows.appendChild(row);
-    if (kind === 'pdf') {
-      pdfjsLib.getDocument(f.url).promise
-        .then(pdf => { row.querySelector('[data-pages]').textContent = pdf.numPages; })
-        .catch(() => { row.querySelector('[data-pages]').textContent = '—'; });
-    } else {
-      row.querySelector('[data-pages]').textContent = '—';
-    }
-  }
-}
-notesSelectBtn.addEventListener('click', () => notesInput.click());
-notesInput.addEventListener('change', e => {
-  notesFiles = filesFromFileList(e.target.files, NOTES_EXTS, notesFiles);
-  renderNotes();
-  updateStatus();
-});
-
-/* ── rendering: LaTeX sources ── */
-const texRows = document.getElementById('tex-rows');
-const texEmpty = document.getElementById('tex-empty');
-const texSelectBtn = document.getElementById('tex-select-btn');
-const texInput = document.getElementById('tex-input');
-
-function renderTex() {
-  texRows.innerHTML = '';
-  texEmpty.style.display = texFiles.length ? 'none' : 'block';
-  for (const f of texFiles) {
-    const row = document.createElement('div');
-    row.className = 'file-row sources';
-    row.innerHTML = `
-      <div class="file-name-cell">
-        <div class="file-icon tex"><span class="ext">${extOf(f.name)}</span></div>
-        <div class="file-name-text"><div class="fname">${escapeHtml(f.name)}</div><div class="fmeta">${fmtSize(f.size)}</div></div>
-      </div>
-      <div class="file-pages mono">${extOf(f.name)}</div>
-      <div class="file-date mono">${timeAgo(f.modified)}</div>
-      <div class="file-action"><button title="open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>`;
-    row.addEventListener('click', () => openTexFile(f));
-    texRows.appendChild(row);
-  }
-}
-texSelectBtn.addEventListener('click', () => texInput.click());
-texInput.addEventListener('change', e => {
-  texFiles = filesFromFileList(e.target.files, TEX_EXTS, texFiles);
-  renderTex();
-  updateStatus();
-});
-
-/* ── viewer modal ── */
+const rows = document.getElementById('rows');
+const empty = document.getElementById('empty');
+const count = document.getElementById('count');
+const status = document.getElementById('status');
+const statusText = document.getElementById('status-text');
+const pathLabel = document.getElementById('path-label');
+const footerNote = document.getElementById('footer-note');
 const modal = document.getElementById('modal');
 const modalBody = document.getElementById('modal-body');
 const modalTitle = document.getElementById('modal-title');
-const modalPageInfo = document.getElementById('modal-page-info');
-const modalPrev = document.getElementById('modal-prev');
-const modalNext = document.getElementById('modal-next');
-const modalCloseBtn = document.getElementById('modal-close-btn');
-let activePdf = null, currentVisiblePage = 1;
+const modalDownload = document.getElementById('modal-download');
+const folderInput = document.getElementById('folder-input');
 
-function openModalShell(title) {
-  modalTitle.textContent = title; modalBody.innerHTML = ''; modalPageInfo.textContent = '';
-  modalPrev.style.display = modalNext.style.display = 'none';
-  modal.classList.add('open'); document.body.style.overflow = 'hidden'; activePdf = null;
-}
-async function openFile(f, kind) {
-  openModalShell(f.name);
-  if (kind === 'pdf') {
-    try {
-      activePdf = await pdfjsLib.getDocument(f.url).promise;
-      const total = activePdf.numPages;
-      modalPrev.style.display = modalNext.style.display = 'inline-block';
-      modalPageInfo.textContent = '1 / ' + total;
-      modalPrev.disabled = true; modalNext.disabled = total <= 1;
-      currentVisiblePage = 1;
-      for (let p = 1; p <= total; p++) {
-        const wrap = document.createElement('div'); wrap.className = 'modal-page-wrap'; wrap.id = 'modal-page-' + p;
-        const pg = await activePdf.getPage(p);
-        const baseVP = pg.getViewport({ scale: 1 });
-        const scale = Math.min(860, window.innerWidth * 0.92) / baseVP.width;
-        const vp = pg.getViewport({ scale });
-        const cvs = document.createElement('canvas'); cvs.width = vp.width; cvs.height = vp.height;
-        await pg.render({ canvasContext: cvs.getContext('2d'), viewport: vp }).promise;
-        const numTag = document.createElement('span'); numTag.className = 'modal-page-num'; numTag.textContent = p + ' / ' + total;
-        wrap.appendChild(cvs); wrap.appendChild(numTag);
-        modalBody.appendChild(wrap);
-      }
-      modalBody.addEventListener('scroll', updatePageInfo);
-    } catch (e) { modalBody.innerHTML = '<p class="modal-empty">Could not open this file.</p>'; }
-  } else if (kind === 'image') {
-    const wrap = document.createElement('div'); wrap.className = 'modal-page-wrap';
-    wrap.innerHTML = `<img src="${f.url}" alt="${escapeHtml(f.name)}">`;
-    modalBody.appendChild(wrap);
-  } else {
-    modalBody.innerHTML = `<p class="modal-empty">No preview for this format.<br><a class="mono" href="${f.url}" download="${escapeHtml(f.name)}">Download ${escapeHtml(f.name)}</a></p>`;
+const ALLOWED = new Set([
+  'pdf','png','jpg','jpeg','gif','webp','svg','bmp','avif',
+  'txt','md','markdown','csv','json','xml','html','htm','css','js','ts','tsx','jsx',
+  'py','c','h','cpp','hpp','java','cs','go','rs','sh','bash','tex','sty','cls','bib','bst',
+  'doc','docx','ppt','pptx','xls','xlsx','odt','ods','odp'
+]);
+const records = [];
+const objectUrls = new Map();
+
+function ext(name){const i=name.lastIndexOf('.');return i<0?'':name.slice(i+1).toLowerCase()}
+function esc(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function size(n){if(!Number.isFinite(n))return '—';if(n<1024)return `${n} B`;if(n<1024*1024)return `${(n/1024).toFixed(0)} KB`;return `${(n/1024/1024).toFixed(1)} MB`}
+function date(v){if(!v)return '—';const d=new Date(v);if(Number.isNaN(d.getTime()))return '—';return d.toLocaleDateString('it-IT',{year:'numeric',month:'2-digit',day:'2-digit'})}
+function kind(name){const e=ext(name);if(e==='pdf')return 'pdf';if(['png','jpg','jpeg','gif','webp','svg','bmp','avif'].includes(e))return 'img';if(['txt','md','markdown','csv','json','xml','html','htm','css','js','ts','tsx','jsx','py','c','h','cpp','hpp','java','cs','go','rs','sh','bash','tex','sty','cls','bib','bst'].includes(e))return 'text';return 'file'}
+function setStatus(text, mode=''){status.classList.remove('live','warn');if(mode)status.classList.add(mode);statusText.textContent=text}
+function resetRecords(){for(const u of objectUrls.values())URL.revokeObjectURL(u);objectUrls.clear();records.length=0}
+function addRecord(r){if(!ALLOWED.has(ext(r.name)))return;records.push(r)}
+function render(){
+  rows.innerHTML='';
+  records.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));
+  count.textContent=records.length;
+  empty.style.display=records.length?'none':'block';
+  for(const f of records){
+    const k=kind(f.name), url=f.url || makeUrl(f);
+    const row=document.createElement('div'); row.className='file-row';
+    const icon=document.createElement('div'); icon.className=`file-icon ${k}`; icon.innerHTML=`<span class="ext">${esc((ext(f.name)||'FILE').slice(0,5).toUpperCase())}</span>`;
+    const name=document.createElement('div'); name.className='file-name-text'; name.innerHTML=`<div class="fname" title="${esc(f.path||f.name)}">${esc(f.name)}</div><div class="fmeta">${esc(f.path||f.name)}</div>`;
+    const cell=document.createElement('div'); cell.className='file-name-cell'; cell.append(icon,name);
+    const s=document.createElement('div'); s.className='file-meta size'; s.textContent=size(f.size);
+    const d=document.createElement('div'); d.className='file-meta'; d.textContent=date(f.modified);
+    const actions=document.createElement('div'); actions.className='actions';
+    const view=document.createElement('button'); view.className='icon-btn'; view.title='View'; view.textContent='↗'; view.addEventListener('click',e=>{e.stopPropagation();openViewer(f)});
+    const dl=document.createElement('a'); dl.className='icon-btn'; dl.title='Download'; dl.textContent='↓'; dl.href=url; dl.download=f.name; dl.addEventListener('click',e=>e.stopPropagation());
+    actions.append(view,dl); row.append(cell,s,d,actions); row.addEventListener('dblclick',()=>openViewer(f)); rows.appendChild(row);
   }
+  footerNote.textContent=`${records.length} file${records.length===1?'':'s'} detected locally`;
 }
-async function openTexFile(f) {
-  openModalShell(f.name);
-  try {
-    const text = await f.file.text();
-    const pre = document.createElement('div'); pre.className = 'modal-source'; pre.textContent = text;
-    modalBody.appendChild(pre);
-  } catch (e) { modalBody.innerHTML = '<p class="modal-empty">Could not read this file.</p>'; }
-}
-function updatePageInfo() {
-  if (!activePdf) return;
-  const total = activePdf.numPages;
-  const wraps = modalBody.querySelectorAll('.modal-page-wrap');
-  let visible = 1;
-  wraps.forEach((w, i) => { if (w.getBoundingClientRect().top < window.innerHeight * 0.55) visible = i + 1; });
-  currentVisiblePage = visible;
-  modalPageInfo.textContent = visible + ' / ' + total;
-  modalPrev.disabled = visible <= 1; modalNext.disabled = visible >= total;
-}
-modalPrev.addEventListener('click', () => { const t = document.getElementById('modal-page-' + (currentVisiblePage - 1)); if (t) t.scrollIntoView({ behavior: 'smooth' }); });
-modalNext.addEventListener('click', () => { const t = document.getElementById('modal-page-' + (currentVisiblePage + 1)); if (t) t.scrollIntoView({ behavior: 'smooth' }); });
-function closeModal() {
-  modal.classList.remove('open'); document.body.style.overflow = '';
-  modalBody.removeEventListener('scroll', updatePageInfo); modalBody.innerHTML = ''; activePdf = null;
-}
-modalCloseBtn.addEventListener('click', closeModal);
-modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+function makeUrl(f){if(f.url)return f.url;if(f.file){const u=URL.createObjectURL(f.file);f.url=u;objectUrls.set(f.path||f.name,u);return u}return f.url}
 
-/* ── status pill + footer ── */
-const statusPill = document.getElementById('status-pill');
-const statusText = document.getElementById('status-text');
-const footerNote = document.getElementById('footer-note');
-
-function updateStatus() {
-  const total = notesFiles.length + texFiles.length;
-  if (total === 0) {
-    statusPill.classList.remove('live');
-    statusText.textContent = 'no folder loaded yet';
-    footerNote.textContent = 'nothing loaded yet — files stay on your device until you select a folder';
-  } else {
-    statusPill.classList.add('live');
-    statusText.textContent = `${total} file${total === 1 ? '' : 's'} loaded`;
-    footerNote.textContent = `${notesFiles.length} note${notesFiles.length === 1 ? '' : 's'} · ${texFiles.length} source${texFiles.length === 1 ? '' : 's'} · loaded from your device, nothing hosted`;
+async function openViewer(f){
+  const url=makeUrl(f);
+  if(!url)return;
+  modal.classList.add('open'); modalTitle.textContent=f.path||f.name; modalDownload.href=url; modalDownload.download=f.name; modalBody.innerHTML='';
+  const k=kind(f.name), e=ext(f.name);
+  if(k==='img'){const img=new Image();img.alt=f.name;img.src=url;const wrap=document.createElement('div');wrap.className='viewer';wrap.appendChild(img);modalBody.appendChild(wrap);return}
+  if(k==='pdf'){const frame=document.createElement('iframe');frame.src=url;frame.title=f.name;const wrap=document.createElement('div');wrap.className='viewer';wrap.appendChild(frame);modalBody.appendChild(wrap);return}
+  if(k==='text'){
+    try{const text=f.file?await f.file.text():await fetch(url).then(r=>r.text());const pre=document.createElement('pre');pre.className='source';pre.textContent=text;modalBody.appendChild(pre)}catch(err){showUnsupported('Impossibile leggere questo file nel browser.')}return
   }
+  showUnsupported('Questo tipo di file può essere scaricato, ma non è visualizzabile direttamente nel browser.');
 }
-updateStatus();
+function showUnsupported(msg){const box=document.createElement('div');box.className='unsupported';box.innerHTML=`<b>Preview non disponibile</b>${esc(msg)}`;modalBody.appendChild(box)}
+function closeViewer(){modal.classList.remove('open');modalBody.innerHTML='';modalDownload.removeAttribute('href')}
 
-/* ── dynamic background: drifting formulas + Feynman diagrams ── */
-const bgCanvas = document.getElementById('bg-canvas');
-const bgCtx = bgCanvas.getContext('2d');
-const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const FORMULAS = [
-  'E = mc²', 'iħ ∂Ψ/∂t = ĤΨ', '∇·E = ρ/ε₀', '∮ B·dl = μ₀I', '∑ₙ₌₀^∞ 1/n!',
-  '⟨ψ|φ⟩', '∂²u/∂t² = c²∇²u', 'ΔxΔp ≥ ħ/2', 'λ = h/p', 'F = Gm₁m₂/r²',
-  '∫ e^(−x²) dx = √π', 'P(A|B) = P(B|A)P(A)/P(B)', 'ψ(x,t)', 'H = T + V',
-  '∇×B = μ₀J + μ₀ε₀∂E/∂t', 'e^(iπ) + 1 = 0', 'S = k log W',
-];
-let bgParticles = [];
-let bgAnim = null;
+document.getElementById('modal-close').addEventListener('click',closeViewer);modal.addEventListener('click',e=>{if(e.target===modal)closeViewer()});window.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewer()});
 
-function resizeCanvas() {
-  bgCanvas.width = window.innerWidth * devicePixelRatio;
-  bgCanvas.height = window.innerHeight * devicePixelRatio;
-  bgCanvas.style.width = window.innerWidth + 'px';
-  bgCanvas.style.height = window.innerHeight + 'px';
-  bgCtx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-}
-function spawnParticle() {
-  return {
-    type: Math.random() < 0.38 ? 'feynman' : 'formula',
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-    vx: (Math.random() - 0.5) * 0.10,
-    vy: (Math.random() - 0.5) * 0.10,
-    rot: (Math.random() - 0.5) * 0.3,
-    vr: (Math.random() - 0.5) * 0.0004,
-    scale: 0.75 + Math.random() * 0.85,
-    text: FORMULAS[Math.floor(Math.random() * FORMULAS.length)],
-    opacity: 0.05 + Math.random() * 0.06,
-  };
-}
-function initParticles() {
-  const count = Math.max(9, Math.min(24, Math.floor((window.innerWidth * window.innerHeight) / 75000)));
-  bgParticles = Array.from({ length: count }, spawnParticle);
-}
-function drawFeynman(ctx, scale, opacity) {
-  ctx.save();
-  ctx.scale(scale, scale);
-  ctx.strokeStyle = `rgba(88,166,255,${opacity})`;
-  ctx.lineWidth = 1.3;
-  const A = [-18, 0], B = [18, 0];
-  ctx.beginPath(); ctx.moveTo(-42, -20); ctx.lineTo(A[0], A[1]); ctx.lineTo(-42, 20); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(42, -20); ctx.lineTo(B[0], B[1]); ctx.lineTo(42, 20); ctx.stroke();
-  ctx.beginPath();
-  const segs = 6, amp = 3.2, steps = segs * 8;
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const x = A[0] + (B[0] - A[0]) * t;
-    const y = Math.sin(t * Math.PI * segs) * amp;
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+document.getElementById('choose-folder').addEventListener('click',()=>folderInput.click());
+folderInput.addEventListener('change',()=>{
+  resetRecords();
+  for(const file of folderInput.files){
+    if(!ALLOWED.has(ext(file.name)))continue;
+    const path=file.webkitRelativePath || file.name;
+    addRecord({name:file.name,path,size:file.size,modified:file.lastModified,file,url:null});
   }
-  ctx.stroke();
-  ctx.restore();
-}
-function tick() {
-  bgCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-  for (const p of bgParticles) {
-    p.x += p.vx; p.y += p.vy; p.rot += p.vr;
-    if (p.x < -120) p.x = window.innerWidth + 120; if (p.x > window.innerWidth + 120) p.x = -120;
-    if (p.y < -120) p.y = window.innerHeight + 120; if (p.y > window.innerHeight + 120) p.y = -120;
-    bgCtx.save();
-    bgCtx.translate(p.x, p.y); bgCtx.rotate(p.rot);
-    if (p.type === 'feynman') {
-      drawFeynman(bgCtx, p.scale, p.opacity);
-    } else {
-      bgCtx.font = `${13 * p.scale}px 'IBM Plex Mono', monospace`;
-      bgCtx.fillStyle = `rgba(230,237,243,${p.opacity})`;
-      bgCtx.fillText(p.text, 0, 0);
-    }
-    bgCtx.restore();
-  }
-  bgAnim = requestAnimationFrame(tick);
-}
-function startBackground() {
-  resizeCanvas();
-  initParticles();
-  if (reduceMotion) { tick(); cancelAnimationFrame(bgAnim); bgAnim = null; return; }
-  tick();
-}
-window.addEventListener('resize', () => { resizeCanvas(); });
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { if (bgAnim) { cancelAnimationFrame(bgAnim); bgAnim = null; } }
-  else if (!reduceMotion && !bgAnim) { tick(); }
+  pathLabel.textContent=folderInput.files[0]?.webkitRelativePath?.split('/')[0] ? `./${folderInput.files[0].webkitRelativePath.split('/')[0]}/` : './';
+  setStatus(records.length?`${records.length} local files loaded`:'folder loaded — no supported files','live');
+  render();
 });
-startBackground();
+
+document.getElementById('refresh').addEventListener('click',scanProjectDirectory);
+
+async function scanProjectDirectory(){
+  resetRecords();
+  if(location.protocol==='file:'){
+    setStatus('browser security blocks automatic folder scanning — choose project folder','warn');
+    render();
+    return;
+  }
+  setStatus('scanning project folder…');
+  try{
+    const res=await fetch('./',{cache:'no-store',headers:{'Accept':'text/html,text/plain;q=.9,*/*;q=.1'}});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const html=await res.text();
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    const links=[...doc.querySelectorAll('a[href]')];
+    const hrefs=links.map(a=>a.getAttribute('href')).filter(Boolean);
+    const candidates=[];
+    for(const href of hrefs){
+      if(href==='../'||href.startsWith('#')||href.endsWith('/'))continue;
+      try{
+        const u=new URL(href,location.href);
+        if(u.origin!==location.origin)continue;
+        const name=decodeURIComponent(u.pathname.split('/').pop()||'');
+        if(ALLOWED.has(ext(name)))candidates.push({name, path:name, url:u.href});
+      }catch{}
+    }
+    for(const f of candidates)addRecord(f);
+    if(records.length){
+      pathLabel.textContent='./';setStatus(`${records.length} project files detected`,'live');render();return;
+    }
+    setStatus('directory listing unavailable — choose project folder','warn');render();
+  }catch(err){
+    setStatus('automatic scan unavailable — choose project folder','warn');render();
+  }
+}
+
+// Lightweight animated background, visually inspired by the reference file.
+const canvas=document.getElementById('bg-canvas'),ctx=canvas.getContext('2d');let W=0,H=0;const nodes=[];
+function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}resize();addEventListener('resize',resize);
+for(let i=0;i<38;i++)nodes.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:Math.random()*1.4+.4,p:Math.random()*6.28});
+(function draw(){ctx.clearRect(0,0,W,H);for(const n of nodes){n.x+=n.vx;n.y+=n.vy;n.p+=.01;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1}for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<145){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(88,166,255,${(1-d/145)*.12})`;ctx.lineWidth=.55;ctx.stroke()}}for(const n of nodes){const g=.25+.25*Math.sin(n.p);ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle=`rgba(88,166,255,${g})`;ctx.fill()}requestAnimationFrame(draw)})();
+
+scanProjectDirectory();
 </script>
 </body>
 </html>
