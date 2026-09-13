@@ -1,206 +1,839 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>files /</title>
+<title>Notes /</title>
 <style>
 :root{
-  --bg:#0d1117; --panel:#161b22; --panel-hover:#1c2333; --border:#30363d;
-  --border-soft:#21262d; --text:#e6edf3; --text-soft:#c9d1d9; --muted:#8b949e;
-  --accent:#58a6ff; --accent-dim:rgba(88,166,255,.10); --purple:#bc8cff;
-  --purple-dim:rgba(188,140,255,.12); --red:#f85149; --red-dim:rgba(248,81,73,.12);
-  --green:#3fb950; --yellow:#d29922; --radius:6px;
+  --bg:#0d1117;
+  --panel:#161b22;
+  --panel-hover:#1c2333;
+  --border:#30363d;
+  --border-soft:#21262d;
+  --text:#e6edf3;
+  --text-soft:#c9d1d9;
+  --muted:#8b949e;
+  --accent:#58a6ff;
+  --accent-dim:rgba(88,166,255,.10);
+  --purple:#bc8cff;
+  --purple-dim:rgba(188,140,255,.12);
+  --red:#f85149;
+  --red-dim:rgba(248,81,73,.12);
+  --green:#3fb950;
+  --radius:6px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:Inter,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5;min-height:100vh;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(88,166,255,.08),transparent 60%);pointer-events:none}
-#bg-canvas{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
-.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-a{color:inherit}
-button{font:inherit}
-.topbar{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:.9rem 2.5rem;border-bottom:1px solid var(--border);background:rgba(13,17,23,.85);backdrop-filter:blur(8px);gap:1rem}
-.brand{display:flex;align-items:center;gap:.55rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.95rem;flex-shrink:0}
-.brand .mark{color:var(--accent);font-weight:700}.brand b{font-weight:600}.brand .slash{color:var(--muted)}
-.status{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.68rem;color:var(--muted);display:flex;align-items:center;gap:.45rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.status .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0}.status.live .dot{background:var(--green)}.status.warn .dot{background:var(--yellow)}
-main{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:3.4rem 1.5rem 6rem}
-.page-head{margin-bottom:2.4rem}.page-head h1{font-family:Georgia,"Times New Roman",serif;font-size:2.05rem;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:.7rem;color:var(--text)}
-.page-head h1 .mark{color:var(--accent);font-family:ui-monospace,monospace}.page-head p{margin-top:.65rem;color:var(--muted);font-size:.94rem;max-width:76ch}
-.toolbar{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;margin-top:1rem}
-.btn{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.70rem;display:inline-flex;align-items:center;gap:.45rem;padding:.48rem .85rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);color:var(--text-soft);cursor:pointer;transition:border-color .15s,color .15s,background .15s;text-decoration:none}
-.btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}.btn.primary{border-color:rgba(88,166,255,.45);background:var(--accent-dim);color:var(--accent)}
-section.block{margin-top:2.6rem}.block-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;gap:1rem;flex-wrap:wrap}.block-head h2{font-size:1.05rem;font-weight:600;display:flex;align-items:center;gap:.5rem}.block-head h2 .count{font:600 .64rem ui-monospace,monospace;color:var(--muted);padding:.18rem .42rem;border:1px solid var(--border);border-radius:4px}
-.file-list{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
-.file-list-head,.file-row{display:grid;grid-template-columns:minmax(0,1fr) 90px 125px 82px;gap:1rem;align-items:center}.file-list-head{padding:.55rem 1.1rem;background:var(--border-soft);border-bottom:1px solid var(--border);font:600 .64rem ui-monospace,monospace;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}.file-list-head span:nth-child(n+2){text-align:right}
-.file-row{padding:.72rem 1.1rem;border-bottom:1px solid var(--border-soft);transition:background .12s}.file-row:last-child{border-bottom:none}.file-row:hover{background:var(--panel-hover)}
-.file-name-cell{display:flex;align-items:center;gap:.8rem;min-width:0}.file-icon{width:30px;height:30px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--border-soft);color:var(--muted);overflow:hidden}.file-icon.pdf{color:var(--red);background:var(--red-dim)}.file-icon.img{color:var(--green)}.file-icon.text{color:var(--purple);background:var(--purple-dim)}.ext{font:600 .55rem ui-monospace,monospace}.file-name-text{min-width:0}.fname{font:500 .88rem ui-monospace,monospace;color:var(--text-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fmeta{font:.65rem ui-monospace,monospace;color:var(--muted);margin-top:.15rem}.file-meta{font:.72rem ui-monospace,monospace;color:var(--muted);text-align:right;white-space:nowrap}.actions{display:flex;justify-content:flex-end;gap:.35rem}.icon-btn{width:28px;height:28px;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;cursor:pointer}.icon-btn:hover{color:var(--accent);border-color:var(--border);background:var(--bg)}
-.empty{padding:2.6rem 1.5rem 2.2rem;text-align:center;color:var(--muted)}.empty .big{font-size:2rem;margin-bottom:.55rem}.empty p{font-size:.88rem;color:var(--text-soft)}.empty .mono{font-size:.72rem;margin-top:.4rem;color:var(--muted)}
-footer{position:relative;z-index:2;max-width:980px;margin:0 auto;padding:0 1.5rem 3rem;font: .66rem ui-monospace,monospace;color:var(--muted);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-#modal{position:fixed;inset:0;z-index:2000;background:rgba(6,8,11,.96);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .18s}#modal.open{opacity:1;pointer-events:auto}
-.modal-topbar{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem;border-bottom:1px solid var(--border);gap:1rem;flex-shrink:0}.modal-title{font:.78rem ui-monospace,monospace;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modal-controls{display:flex;align-items:center;gap:.45rem;flex-shrink:0}.modal-btn{font:.65rem ui-monospace,monospace;padding:.35rem .65rem;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;border-radius:var(--radius)}.modal-btn:hover{border-color:var(--accent);color:var(--accent)}.modal-close{color:var(--red);border-color:rgba(248,81,73,.3)}.modal-body{flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:2.2rem 1rem 3rem;gap:1.2rem}.viewer{width:min(920px,94vw);display:flex;justify-content:center}.viewer img{display:block;max-width:100%;max-height:78vh;object-fit:contain;border:1px solid var(--border);box-shadow:0 6px 30px rgba(0,0,0,.5)}.viewer iframe{width:min(920px,94vw);height:78vh;border:1px solid var(--border);background:white}.source{width:min(920px,94vw);background:#0b0f14;color:var(--text-soft);border:1px solid var(--border);border-radius:6px;padding:1.25rem;font: .78rem/1.7 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;overflow:auto;max-height:78vh}.unsupported{width:min(720px,92vw);padding:2rem;text-align:center;color:var(--muted);font: .78rem ui-monospace,monospace}.unsupported b{display:block;color:var(--text);font-size:.95rem;margin-bottom:.5rem}
-@media(max-width:700px){.topbar{padding:.9rem 1.2rem}.status{display:none}main{padding:2.6rem 1.2rem 4rem}.file-list-head,.file-row{grid-template-columns:minmax(0,1fr) 42px 72px}.file-list-head span:nth-child(2),.file-row .file-meta.size{display:none}.file-list-head span:nth-child(3){text-align:right}.file-list-head span:nth-child(4){text-align:right}.file-row{gap:.5rem}.fname{font-size:.8rem}.actions{gap:.2rem}.icon-btn{width:26px;height:26px}footer{padding:0 1.2rem 2.5rem;flex-direction:column}}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 50% -10%,
+      rgba(88,166,255,.08),
+      transparent 60%
+    );
+  pointer-events:none;
+}
+
+#bg-canvas{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+
+.mono{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+a{
+  color:inherit;
+}
+
+/* TOP BAR */
+
+.topbar{
+  position:relative;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:.9rem 2.5rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(13,17,23,.85);
+  backdrop-filter:blur(8px);
+  gap:1rem;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.95rem;
+}
+
+.brand .mark{
+  color:var(--accent);
+  font-weight:700;
+}
+
+.brand b{
+  font-weight:600;
+}
+
+.brand .slash{
+  color:var(--muted);
+}
+
+.status{
+  font:600 .68rem ui-monospace,SFMono-Regular,Menlo,monospace;
+  color:var(--muted);
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+}
+
+.status .dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--green);
+}
+
+/* MAIN */
+
+main{
+  position:relative;
+  z-index:2;
+  max-width:980px;
+  margin:0 auto;
+  padding:3.4rem 1.5rem 6rem;
+}
+
+.page-head{
+  margin-bottom:2.6rem;
+}
+
+.page-head h1{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:2.05rem;
+  font-weight:700;
+  letter-spacing:-.01em;
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+  color:var(--text);
+}
+
+.page-head h1 .mark{
+  color:var(--accent);
+  font-family:ui-monospace,monospace;
+}
+
+.page-head p{
+  margin-top:.65rem;
+  color:var(--muted);
+  font-size:.95rem;
+  max-width:70ch;
+}
+
+/* FILE SECTION */
+
+section.block{
+  margin-top:2.6rem;
+}
+
+.block-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:.9rem;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+
+.block-head h2{
+  font-size:1.05rem;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+
+.count{
+  font:600 .64rem ui-monospace,monospace;
+  color:var(--muted);
+  padding:.18rem .42rem;
+  border:1px solid var(--border);
+  border-radius:4px;
+}
+
+.file-list{
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:var(--panel);
+}
+
+.file-list-head,
+.file-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 100px 90px;
+  gap:1rem;
+  align-items:center;
+}
+
+.file-list-head{
+  padding:.55rem 1.1rem;
+  background:var(--border-soft);
+  border-bottom:1px solid var(--border);
+  font:600 .64rem ui-monospace,monospace;
+  letter-spacing:.06em;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+.file-list-head span:nth-child(n+2){
+  text-align:right;
+}
+
+.file-row{
+  padding:.78rem 1.1rem;
+  border-bottom:1px solid var(--border-soft);
+  transition:background .12s;
+  cursor:pointer;
+}
+
+.file-row:last-child{
+  border-bottom:none;
+}
+
+.file-row:hover{
+  background:var(--panel-hover);
+}
+
+.file-row:focus{
+  outline:1px solid var(--accent);
+  outline-offset:-1px;
+  background:var(--panel-hover);
+}
+
+.file-name-cell{
+  display:flex;
+  align-items:center;
+  gap:.8rem;
+  min-width:0;
+}
+
+.file-icon{
+  width:30px;
+  height:30px;
+  border-radius:var(--radius);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  background:var(--red-dim);
+  color:var(--red);
+}
+
+.ext{
+  font:600 .55rem ui-monospace,monospace;
+}
+
+.file-name-text{
+  min-width:0;
+}
+
+.fname{
+  font:500 .88rem ui-monospace,monospace;
+  color:var(--text-soft);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.fmeta{
+  font:.65rem ui-monospace,monospace;
+  color:var(--muted);
+  margin-top:.15rem;
+}
+
+.file-meta{
+  font:.72rem ui-monospace,monospace;
+  color:var(--muted);
+  text-align:right;
+  white-space:nowrap;
+}
+
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:.35rem;
+}
+
+.icon-btn{
+  width:28px;
+  height:28px;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--muted);
+  border-radius:var(--radius);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  color:var(--accent);
+  border-color:var(--border);
+  background:var(--bg);
+}
+
+/* FOOTER */
+
+footer{
+  position:relative;
+  z-index:2;
+  max-width:980px;
+  margin:0 auto;
+  padding:0 1.5rem 3rem;
+  font:.66rem ui-monospace,monospace;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+
+/* MODAL */
+
+#modal{
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  background:rgba(6,8,11,.97);
+  display:flex;
+  flex-direction:column;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s;
+}
+
+#modal.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.modal-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:.9rem 1.1rem;
+  border-bottom:1px solid var(--border);
+  gap:1rem;
+  flex-shrink:0;
+}
+
+.modal-title{
+  font:.78rem ui-monospace,monospace;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.modal-controls{
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+  flex-shrink:0;
+}
+
+.modal-btn{
+  font:.65rem ui-monospace,monospace;
+  padding:.38rem .72rem;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  border-radius:var(--radius);
+  text-decoration:none;
+}
+
+.modal-btn:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.modal-close{
+  color:var(--red);
+  border-color:rgba(248,81,73,.3);
+}
+
+.modal-close:hover{
+  border-color:var(--red);
+  color:var(--red);
+}
+
+.modal-body{
+  flex:1;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:2.2rem 1rem 3rem;
+}
+
+.viewer{
+  width:min(1100px,95vw);
+  height:calc(100vh - 125px);
+  display:flex;
+  justify-content:center;
+}
+
+.viewer iframe{
+  width:100%;
+  height:100%;
+  border:1px solid var(--border);
+  background:#fff;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:700px){
+
+  .topbar{
+    padding:.9rem 1.2rem;
+  }
+
+  .status{
+    display:none;
+  }
+
+  main{
+    padding:2.6rem 1.2rem 4rem;
+  }
+
+  .file-list-head,
+  .file-row{
+    grid-template-columns:minmax(0,1fr) 82px;
+  }
+
+  .file-list-head span:nth-child(2),
+  .file-row .file-meta{
+    display:none;
+  }
+
+  .actions{
+    gap:.2rem;
+  }
+
+  .icon-btn{
+    width:26px;
+    height:26px;
+  }
+
+  footer{
+    padding:0 1.2rem 2.5rem;
+    flex-direction:column;
+  }
+
+  .page-head h1{
+    font-size:1.8rem;
+  }
+
+  .viewer{
+    height:calc(100vh - 115px);
+  }
+}
 </style>
 </head>
+
 <body>
+
 <canvas id="bg-canvas"></canvas>
+
 <header class="topbar">
-  <div class="brand"><span class="mark">◈</span><b>files</b><span class="slash">/</span></div>
-  <div id="status" class="status"><span class="dot"></span><span id="status-text">scanning project folder…</span></div>
-</header>
-<main>
-  <div class="page-head">
-    <h1><span class="mark">⌂</span> Project files</h1>
-    <p>Consultazione dei file presenti nella stessa cartella di questo HTML. Nessun selettore di file e nessun caricamento verso Internet: puoi soltanto visualizzare e scaricare i file del progetto.</p>
-    <div class="toolbar">
-      <button class="btn primary" id="refresh">refresh project files</button>
-    </div>
+  <div class="brand">
+    <span class="mark">◈</span>
+    <b>notes</b>
+    <span class="slash">/</span>
   </div>
+
+  <div class="status">
+    <span class="dot"></span>
+    <span>local project</span>
+  </div>
+</header>
+
+<main>
+
+  <div class="page-head">
+    <h1>
+      <span class="mark">⌂</span>
+      Notes
+    </h1>
+
+    <p>
+      A collection of mathematics and physics notes, drafts, references,
+      and related study material.
+    </p>
+  </div>
+
   <section class="block">
-    <div class="block-head"><h2>Files <span class="count" id="count">0</span></h2><span class="mono" id="path-label" style="font-size:.68rem;color:var(--muted)">./</span></div>
-    <div class="file-list">
-      <div class="file-list-head"><span>name</span><span>size</span><span>modified</span><span>action</span></div>
-      <div id="rows"></div>
-      <div id="empty" class="empty"><div class="big">□</div><p>No project files detected.</p><p class="mono">The page reads only the directory that contains this HTML file.</p></div>
+
+    <div class="block-head">
+      <h2>
+        PDF notes
+        <span class="count">1</span>
+      </h2>
+
+      <span
+        class="mono"
+        style="font-size:.68rem;color:var(--muted)"
+      >
+        ./
+      </span>
     </div>
+
+    <div class="file-list">
+
+      <div class="file-list-head">
+        <span>name</span>
+        <span>type</span>
+        <span>action</span>
+      </div>
+
+      <div
+        class="file-row"
+        data-pdf="QFT_1.pdf"
+        tabindex="0"
+        role="button"
+        aria-label="Open QFT_1.pdf"
+      >
+
+        <div class="file-name-cell">
+
+          <div class="file-icon">
+            <span class="ext">PDF</span>
+          </div>
+
+          <div class="file-name-text">
+            <div class="fname">QFT_1.pdf</div>
+            <div class="fmeta">local project file</div>
+          </div>
+
+        </div>
+
+        <div class="file-meta">
+          PDF
+        </div>
+
+        <div class="actions">
+
+          <button
+            class="icon-btn view-btn"
+            type="button"
+            title="View"
+            aria-label="View QFT_1.pdf"
+          >
+            ↗
+          </button>
+
+          <a
+            class="icon-btn"
+            href="QFT_1.pdf"
+            download
+            title="Download"
+            aria-label="Download QFT_1.pdf"
+          >
+            ↓
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </section>
+
 </main>
-<footer><span id="footer-note">local viewer</span><span>view / download only</span></footer>
-<div id="modal" role="dialog" aria-modal="true" aria-label="File viewer">
-  <div class="modal-topbar"><span id="modal-title" class="modal-title">—</span><div class="modal-controls"><a id="modal-download" class="modal-btn" href="#" download>download</a><button id="modal-close" class="modal-btn modal-close">close</button></div></div>
-  <div id="modal-body" class="modal-body"></div>
+
+<footer>
+  <span>1 file available</span>
+  <span>view / download only</span>
+</footer>
+
+<div
+  id="modal"
+  role="dialog"
+  aria-modal="true"
+  aria-label="PDF viewer"
+>
+
+  <div class="modal-topbar">
+
+    <span
+      id="modal-title"
+      class="modal-title"
+    >
+      QFT_1.pdf
+    </span>
+
+    <div class="modal-controls">
+
+      <a
+        class="modal-btn"
+        href="QFT_1.pdf"
+        download
+      >
+        download
+      </a>
+
+      <button
+        id="modal-close"
+        class="modal-btn modal-close"
+        type="button"
+      >
+        close
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="modal-body">
+
+    <div class="viewer">
+
+      <iframe
+        src="QFT_1.pdf"
+        title="QFT_1.pdf"
+      ></iframe>
+
+    </div>
+
+  </div>
+
 </div>
+
 <script>
 'use strict';
 
-const rows = document.getElementById('rows');
-const empty = document.getElementById('empty');
-const count = document.getElementById('count');
-const status = document.getElementById('status');
-const statusText = document.getElementById('status-text');
-const pathLabel = document.getElementById('path-label');
-const footerNote = document.getElementById('footer-note');
+/*
+  The project contains exactly one local PDF.
+
+  No:
+  - file picker
+  - folder picker
+  - filesystem scan
+  - fetch()
+  - upload
+  - external file source
+
+  The PDF is referenced directly from the same project directory.
+*/
+
+const pdfPath = 'QFT_1.pdf';
+
 const modal = document.getElementById('modal');
-const modalBody = document.getElementById('modal-body');
-const modalTitle = document.getElementById('modal-title');
-const modalDownload = document.getElementById('modal-download');
+const closeButton = document.getElementById('modal-close');
+const row = document.querySelector('.file-row[data-pdf]');
+const viewButton = document.querySelector('.view-btn');
 
-const ALLOWED = new Set([
-  'pdf','png','jpg','jpeg','gif','webp','svg','bmp','avif',
-  'txt','md','markdown','csv','json','xml','html','htm','css','js','ts','tsx','jsx',
-  'py','c','h','cpp','hpp','java','cs','go','rs','sh','bash','tex','sty','cls','bib','bst',
-  'doc','docx','ppt','pptx','xls','xlsx','odt','ods','odp'
-]);
-const records = [];
-const objectUrls = new Map();
-
-function ext(name){const i=name.lastIndexOf('.');return i<0?'':name.slice(i+1).toLowerCase()}
-function esc(s){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-function size(n){if(!Number.isFinite(n))return '—';if(n<1024)return `${n} B`;if(n<1024*1024)return `${(n/1024).toFixed(0)} KB`;return `${(n/1024/1024).toFixed(1)} MB`}
-function date(v){if(!v)return '—';const d=new Date(v);if(Number.isNaN(d.getTime()))return '—';return d.toLocaleDateString('it-IT',{year:'numeric',month:'2-digit',day:'2-digit'})}
-function kind(name){const e=ext(name);if(e==='pdf')return 'pdf';if(['png','jpg','jpeg','gif','webp','svg','bmp','avif'].includes(e))return 'img';if(['txt','md','markdown','csv','json','xml','html','htm','css','js','ts','tsx','jsx','py','c','h','cpp','hpp','java','cs','go','rs','sh','bash','tex','sty','cls','bib','bst'].includes(e))return 'text';return 'file'}
-function setStatus(text, mode=''){status.classList.remove('live','warn');if(mode)status.classList.add(mode);statusText.textContent=text}
-function resetRecords(){for(const u of objectUrls.values())URL.revokeObjectURL(u);objectUrls.clear();records.length=0}
-function addRecord(r){if(!ALLOWED.has(ext(r.name)))return;records.push(r)}
-function render(){
-  rows.innerHTML='';
-  records.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));
-  count.textContent=records.length;
-  empty.style.display=records.length?'none':'block';
-  for(const f of records){
-    const k=kind(f.name), url=f.url || makeUrl(f);
-    const row=document.createElement('div'); row.className='file-row';
-    const icon=document.createElement('div'); icon.className=`file-icon ${k}`; icon.innerHTML=`<span class="ext">${esc((ext(f.name)||'FILE').slice(0,5).toUpperCase())}</span>`;
-    const name=document.createElement('div'); name.className='file-name-text'; name.innerHTML=`<div class="fname" title="${esc(f.path||f.name)}">${esc(f.name)}</div><div class="fmeta">${esc(f.path||f.name)}</div>`;
-    const cell=document.createElement('div'); cell.className='file-name-cell'; cell.append(icon,name);
-    const s=document.createElement('div'); s.className='file-meta size'; s.textContent=size(f.size);
-    const d=document.createElement('div'); d.className='file-meta'; d.textContent=date(f.modified);
-    const actions=document.createElement('div'); actions.className='actions';
-    const view=document.createElement('button'); view.className='icon-btn'; view.title='View'; view.textContent='↗'; view.addEventListener('click',e=>{e.stopPropagation();openViewer(f)});
-    const dl=document.createElement('a'); dl.className='icon-btn'; dl.title='Download'; dl.textContent='↓'; dl.href=url; dl.download=f.name; dl.addEventListener('click',e=>e.stopPropagation());
-    actions.append(view,dl); row.append(cell,s,d,actions); row.addEventListener('dblclick',()=>openViewer(f)); rows.appendChild(row);
-  }
-  footerNote.textContent=`${records.length} file${records.length===1?'':'s'} detected locally`;
+function openPdf(){
+  modal.classList.add('open');
 }
-function makeUrl(f){if(f.url)return f.url;if(f.file){const u=URL.createObjectURL(f.file);f.url=u;objectUrls.set(f.path||f.name,u);return u}return f.url}
 
-async function openViewer(f){
-  const url=makeUrl(f);
-  if(!url)return;
-  modal.classList.add('open'); modalTitle.textContent=f.path||f.name; modalDownload.href=url; modalDownload.download=f.name; modalBody.innerHTML='';
-  const k=kind(f.name), e=ext(f.name);
-  if(k==='img'){const img=new Image();img.alt=f.name;img.src=url;const wrap=document.createElement('div');wrap.className='viewer';wrap.appendChild(img);modalBody.appendChild(wrap);return}
-  if(k==='pdf'){const frame=document.createElement('iframe');frame.src=url;frame.title=f.name;const wrap=document.createElement('div');wrap.className='viewer';wrap.appendChild(frame);modalBody.appendChild(wrap);return}
-  if(k==='text'){
-    try{const text=f.file?await f.file.text():await fetch(url).then(r=>r.text());const pre=document.createElement('pre');pre.className='source';pre.textContent=text;modalBody.appendChild(pre)}catch(err){showUnsupported('Impossibile leggere questo file nel browser.')}return
-  }
-  showUnsupported('Questo tipo di file può essere scaricato, ma non è visualizzabile direttamente nel browser.');
+function closePdf(){
+  modal.classList.remove('open');
 }
-function showUnsupported(msg){const box=document.createElement('div');box.className='unsupported';box.innerHTML=`<b>Preview non disponibile</b>${esc(msg)}`;modalBody.appendChild(box)}
-function closeViewer(){modal.classList.remove('open');modalBody.innerHTML='';modalDownload.removeAttribute('href')}
 
-document.getElementById('modal-close').addEventListener('click',closeViewer);modal.addEventListener('click',e=>{if(e.target===modal)closeViewer()});window.addEventListener('keydown',e=>{if(e.key==='Escape')closeViewer()});
+row.addEventListener('dblclick', openPdf);
 
-document.getElementById('refresh').addEventListener('click',scanProjectDirectory);
+row.addEventListener('keydown', (event) => {
 
-async function scanProjectDirectory(){
-  resetRecords();
-  setStatus('scanning current project folder…');
+  if(event.key === 'Enter' || event.key === ' '){
 
-  // IMPORTANT: this request is strictly relative to the same origin and directory
-  // as this HTML file. No remote URL, file picker, or upload mechanism is used.
-  if(location.protocol==='file:'){
-    setStatus('serve this project with a local web server', 'warn');
-    pathLabel.textContent='./';
-    render();
-    return;
+    event.preventDefault();
+    openPdf();
+
   }
 
-  try{
-    const base = new URL('./', location.href);
-    const res = await fetch(base.href, {cache:'no-store', credentials:'same-origin'});
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+});
 
-    const html = await res.text();
-    const doc = new DOMParser().parseFromString(html,'text/html');
-    const links=[...doc.querySelectorAll('a[href]')];
+viewButton.addEventListener('click', openPdf);
 
-    for(const a of links){
-      const href=a.getAttribute('href');
-      if(!href || href==='../' || href.startsWith('#') || href.endsWith('/')) continue;
-      try{
-        const u=new URL(href, base.href);
-        // Same origin + same directory only.
-        if(u.origin!==location.origin || u.pathname.slice(0, base.pathname.length)!==base.pathname) continue;
-        const name=decodeURIComponent(u.pathname.slice(base.pathname.length));
-        if(!name || name.includes('/')) continue;
-        if(name===location.pathname.split('/').pop()) continue;
-        if(ALLOWED.has(ext(name))) addRecord({name, path:name, url:u.href});
-      }catch{}
+closeButton.addEventListener('click', closePdf);
+
+modal.addEventListener('click', (event) => {
+
+  if(event.target === modal){
+    closePdf();
+  }
+
+});
+
+document.addEventListener('keydown', (event) => {
+
+  if(event.key === 'Escape'){
+    closePdf();
+  }
+
+});
+
+
+/*
+  Subtle animated background inspired by the reference design.
+*/
+
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+
+let W = 0;
+let H = 0;
+
+const nodes = [];
+
+function resizeCanvas(){
+
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+
+}
+
+resizeCanvas();
+
+window.addEventListener('resize', resizeCanvas);
+
+for(let i = 0; i < 38; i++){
+
+  nodes.push({
+
+    x:Math.random() * window.innerWidth,
+    y:Math.random() * window.innerHeight,
+
+    vx:(Math.random() - 0.5) * 0.18,
+    vy:(Math.random() - 0.5) * 0.18,
+
+    r:Math.random() * 1.4 + 0.4,
+
+    phase:Math.random() * Math.PI * 2
+
+  });
+
+}
+
+function drawBackground(){
+
+  ctx.clearRect(0,0,W,H);
+
+  for(const node of nodes){
+
+    node.x += node.vx;
+    node.y += node.vy;
+    node.phase += 0.01;
+
+    if(node.x < 0 || node.x > W){
+      node.vx *= -1;
     }
 
-    if(records.length){
-      pathLabel.textContent='./';
-      setStatus(`${records.length} project files detected`,'live');
-    }else{
-      setStatus('no supported files in the project folder','warn');
+    if(node.y < 0 || node.y > H){
+      node.vy *= -1;
     }
-    render();
-  }catch(err){
-    pathLabel.textContent='./';
-    setStatus('cannot read the project directory listing','warn');
-    render();
+
   }
+
+  for(let i = 0; i < nodes.length; i++){
+
+    for(let j = i + 1; j < nodes.length; j++){
+
+      const a = nodes[i];
+      const b = nodes[j];
+
+      const distance = Math.hypot(
+        a.x - b.x,
+        a.y - b.y
+      );
+
+      if(distance < 145){
+
+        ctx.beginPath();
+
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
+
+        ctx.strokeStyle =
+          `rgba(88,166,255,${(1-distance/145)*0.12})`;
+
+        ctx.lineWidth = 0.55;
+
+        ctx.stroke();
+
+      }
+
+    }
+
+  }
+
+  for(const node of nodes){
+
+    const alpha =
+      0.25 + 0.25 * Math.sin(node.phase);
+
+    ctx.beginPath();
+
+    ctx.arc(
+      node.x,
+      node.y,
+      node.r,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle =
+      `rgba(88,166,255,${alpha})`;
+
+    ctx.fill();
+
+  }
+
+  requestAnimationFrame(drawBackground);
+
 }
 
-
-// Lightweight animated background, visually inspired by the reference file.
-const canvas=document.getElementById('bg-canvas'),ctx=canvas.getContext('2d');let W=0,H=0;const nodes=[];
-function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}resize();addEventListener('resize',resize);
-for(let i=0;i<38;i++)nodes.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:Math.random()*1.4+.4,p:Math.random()*6.28});
-(function draw(){ctx.clearRect(0,0,W,H);for(const n of nodes){n.x+=n.vx;n.y+=n.vy;n.p+=.01;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1}for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<145){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(88,166,255,${(1-d/145)*.12})`;ctx.lineWidth=.55;ctx.stroke()}}for(const n of nodes){const g=.25+.25*Math.sin(n.p);ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle=`rgba(88,166,255,${g})`;ctx.fill()}requestAnimationFrame(draw)})();
-
-scanProjectDirectory();
+drawBackground();
 </script>
+
 </body>
 </html>
