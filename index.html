@@ -102,15 +102,30 @@
     color: var(--text);
   }
   .page-head h1 .cat-icon { color: var(--accent); flex-shrink: 0; }
-  .page-head p { margin-top: 0.65rem; color: var(--muted); font-size: 0.95rem; max-width: 54ch; }
+  .page-head p { margin-top: 0.65rem; color: var(--muted); font-size: 0.95rem; max-width: 58ch; }
   .page-head p code { font-family: 'IBM Plex Mono', monospace; font-size: 0.86em; color: var(--purple); background: var(--purple-dim); padding: 0.1em 0.35em; border-radius: 4px; }
 
   section.block { margin-top: 2.6rem; }
-  .block-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.9rem; gap: 1rem; flex-wrap: wrap; }
+  .block-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.9rem; gap: 1rem; flex-wrap: wrap; }
   .block-head h2 { font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
   .block-head h2 svg { color: var(--muted); }
-  .block-head .block-sub { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); text-align: right; }
-  .block-head .block-sub .mode-tag { color: var(--muted); }
+  .block-head .block-sub { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+
+  .select-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    display: flex; align-items: center; gap: 0.45rem;
+    padding: 0.42rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .select-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
   /* ── GitHub-style file table ── */
   .file-list { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--panel); }
@@ -164,6 +179,7 @@
   .empty-state p { font-size: 0.88rem; color: var(--text-soft); }
   .empty-state .mono { font-size: 0.72rem; margin-top: 0.4rem; color: var(--muted); }
   .empty-state .mono code { color: var(--purple); }
+  .empty-state .select-btn { margin: 1rem auto 0; }
 
   footer {
     position: relative; z-index: 2; max-width: 840px; margin: 0 auto; padding: 0 1.5rem 3rem;
@@ -221,7 +237,7 @@
     </svg>
     <b>notes</b><span class="slash">/</span>
   </div>
-  <div class="status-pill mono" id="status-pill"><span class="dot"></span><span id="status-text">scanning local folders…</span></div>
+  <div class="status-pill mono" id="status-pill"><span class="dot"></span><span id="status-text">no folder loaded yet</span></div>
 </header>
 
 <main>
@@ -237,7 +253,7 @@
         <path d="M14 12.3 L15.8 14.1 M15.8 12.3 L14 14.1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
       </svg>
     </h1>
-    <p>A personal, local-only archive of notes — mathematics, physics, working drafts. This page never accepts uploads: it only shows files you've explicitly listed in its own script, and only if they're actually present in the project's <code>notes/</code> and <code>latex/</code> folders.</p>
+    <p>A personal archive of notes — mathematics, physics, working drafts. Nothing here is hosted anywhere: click "select folder" below and pick your <code>notes/</code> or <code>latex/</code> folder from your computer. The browser reads every matching file inside it automatically — no filenames to type, no server, no upload to anywhere outside this page.</p>
   </div>
 
   <section class="block">
@@ -246,7 +262,10 @@
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 2h6l4 4v8H3V2z" stroke="currentColor" stroke-width="1.1"/><path d="M9 2v4h4" stroke="currentColor" stroke-width="1.1"/></svg>
         Notes
       </h2>
-      <span class="block-sub mono">PDF, images, documents · listed in <span class="mono">NOTES_FILES</span></span>
+      <button class="select-btn" id="notes-select-btn">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 4.5a1 1 0 0 1 1-1H6l1.5 1.8h6a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+        select notes folder
+      </button>
     </div>
     <div class="file-list" id="notes-list-container">
       <div class="file-list-head"><span>name</span><span>pages</span><span>modified</span><span></span></div>
@@ -257,8 +276,8 @@
           <rect x="30" y="22" width="24" height="30" rx="2" stroke="currentColor" stroke-width="1.2" opacity="0.6"/>
           <path d="M35 30h14M35 36h14M35 42h9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity="0.5"/>
         </svg>
-        <p>No notes here yet.</p>
-        <p class="mono">Put the file in <code>notes/</code>, then add its filename to <code>NOTES_FILES</code> in this page's script.</p>
+        <p>No folder loaded yet.</p>
+        <p class="mono">Click below and choose your <code>notes/</code> folder — PDFs, images and documents inside it will be picked up automatically.</p>
       </div>
     </div>
   </section>
@@ -269,7 +288,10 @@
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
         LaTeX sources
       </h2>
-      <span class="block-sub mono">.tex · .sty · .cls · .bib · listed in <span class="mono">LATEX_FILES</span></span>
+      <button class="select-btn" id="tex-select-btn">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1.5 4.5a1 1 0 0 1 1-1H6l1.5 1.8h6a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V4.5z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+        select latex folder
+      </button>
     </div>
     <div class="file-list" id="tex-list-container">
       <div class="file-list-head sources"><span>name</span><span>type</span><span>modified</span><span></span></div>
@@ -280,16 +302,22 @@
           <path d="M34 22 L24 36 L34 50" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
           <path d="M50 22 L60 36 L50 50" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
         </svg>
-        <p>No sources yet.</p>
-        <p class="mono">Put the file in <code>latex/</code>, then add its filename to <code>LATEX_FILES</code> in this page's script.</p>
+        <p>No folder loaded yet.</p>
+        <p class="mono">Click below and choose your <code>latex/</code> folder — .tex, .sty, .cls and .bib files inside it will be picked up automatically.</p>
       </div>
     </div>
   </section>
 </main>
 
 <footer>
-  <span id="footer-note" class="mono">scanning…</span>
+  <span id="footer-note" class="mono">nothing loaded yet</span>
 </footer>
+
+<!-- Hidden folder pickers: "webkitdirectory" lets the user choose an entire folder,
+     and the browser hands back every file inside it — no manual filename entry,
+     no server, nothing leaves this page. -->
+<input type="file" id="notes-input" webkitdirectory directory multiple hidden>
+<input type="file" id="tex-input" webkitdirectory directory multiple hidden>
 
 <div id="modal" role="dialog" aria-modal="true">
   <div class="modal-topbar">
@@ -309,18 +337,21 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 /* ══════════════════════════════════════════════
-   LOCAL FOLDER CONFIG
+   HOW FILES GET IN
    ------------------------------------------------
-   No accounts, no tokens, nothing sent anywhere.
-   Files live in these two folders next to this HTML
-   file; which files show up is controlled below by
-   NOTES_FILES / LATEX_FILES (see that block further
-   down, right before the rendering code).
+   Nothing is hosted, fetched from a URL, or uploaded
+   to any server. The user clicks "select folder", the
+   browser's native folder picker opens, and once they
+   confirm, the File API hands this page the full list
+   of files inside — read straight from local disk, kept
+   only in this tab's memory. Filtering by extension and
+   sorting happens automatically; nobody types filenames.
    ══════════════════════════════════════════════ */
-const NOTES_DIR  = 'notes';
-const LATEX_DIR  = 'latex';
 const NOTES_EXTS = ['pdf','png','jpg','jpeg','gif','webp','svg','doc','docx','ppt','pptx','md','txt'];
 const TEX_EXTS   = ['tex','sty','cls','bib','bst','dtx','ins'];
+
+let notesFiles = []; // { name, file, size, modified, url }
+let texFiles   = [];
 
 /* ── helpers ── */
 function extOf(name) { const p = name.split('.'); return p.length > 1 ? p.pop().toUpperCase() : '—'; }
@@ -348,61 +379,36 @@ function timeAgo(iso) {
 }
 function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-/* ══════════════════════════════════════════════
-   FILE LIST — edit this when you add/remove a file
-   ------------------------------------------------
-   No JSON, no server-side listing: this array IS the
-   index. To add a file:
-     1) put the actual file inside notes/ or latex/
-     2) add its exact filename to the matching list below
-     3) save this HTML file and reload the page
-   Everything else (icon, size, date, preview) is
-   worked out automatically from the file itself.
-   ══════════════════════════════════════════════ */
-const NOTES_FILES = [
-  // 'my-notes.pdf',
-  // 'lecture-photo.jpg',
-  'QFT_1.pdf',
-];
-const LATEX_FILES = [
-  // 'thesis.tex',
-  // 'refs.bib',
-];
-
-/* ── helpers ── */
-async function headMeta(dir, name) {
-  try {
-    const res = await fetch(`${dir}/${encodeURIComponent(name)}`, { method: 'HEAD', cache: 'no-store' });
-    if (!res.ok) return null;
-    const len = res.headers.get('content-length');
-    const mod = res.headers.get('last-modified');
-    return { size: len ? parseInt(len, 10) : undefined, modified: mod ? new Date(mod).toISOString() : undefined };
-  } catch (e) { return null; }
-}
-async function resolveFiles(dir, names, exts) {
-  const filtered = names.filter(name => exts.includes(extOf(name).toLowerCase()));
-  const resolved = await Promise.all(filtered.map(async name => {
-    const meta = await headMeta(dir, name);
-    if (!meta) return null; // file listed but not actually found in the folder
-    return { name, size: meta.size, modified: meta.modified };
-  }));
-  return resolved.filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
+/* ── turn a picked FileList into our internal file records ── */
+function filesFromFileList(fileList, exts, previousList) {
+  // Revoke old object URLs so we don't leak memory across re-selections.
+  (previousList || []).forEach(f => { if (f.url) URL.revokeObjectURL(f.url); });
+  return Array.from(fileList)
+    .filter(f => exts.includes(extOf(f.name).toLowerCase()))
+    .map(f => ({
+      name: f.name,
+      file: f,
+      size: f.size,
+      modified: f.lastModified ? new Date(f.lastModified).toISOString() : null,
+      url: URL.createObjectURL(f),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/* ── rendering ── */
+/* ── rendering: Notes ── */
 const notesRows = document.getElementById('notes-rows');
 const notesEmpty = document.getElementById('notes-empty');
+const notesSelectBtn = document.getElementById('notes-select-btn');
+const notesInput = document.getElementById('notes-input');
 
-async function loadNotes() {
-  const files = await resolveFiles(NOTES_DIR, NOTES_FILES, NOTES_EXTS);
+function renderNotes() {
   notesRows.innerHTML = '';
-  notesEmpty.style.display = files.length ? 'none' : 'block';
-  for (const f of files) {
+  notesEmpty.style.display = notesFiles.length ? 'none' : 'block';
+  for (const f of notesFiles) {
     const kind = kindOf(f.name);
-    const url = `${NOTES_DIR}/${encodeURIComponent(f.name)}`;
     const row = document.createElement('div');
     row.className = 'file-row';
-    const iconInner = kind === 'image' ? `<img src="${url}" alt="">` : `<span class="ext">${extOf(f.name)}</span>`;
+    const iconInner = kind === 'image' ? `<img src="${f.url}" alt="">` : `<span class="ext">${extOf(f.name)}</span>`;
     row.innerHTML = `
       <div class="file-name-cell">
         <div class="file-icon ${kind}">${iconInner}</div>
@@ -411,28 +417,34 @@ async function loadNotes() {
       <div class="file-pages mono" data-pages>…</div>
       <div class="file-date mono">${timeAgo(f.modified)}</div>
       <div class="file-action"><button title="open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>`;
-    row.addEventListener('click', () => openFile(f, kind, url));
+    row.addEventListener('click', () => openFile(f, kind));
     notesRows.appendChild(row);
     if (kind === 'pdf') {
-      pdfjsLib.getDocument(url).promise
+      pdfjsLib.getDocument(f.url).promise
         .then(pdf => { row.querySelector('[data-pages]').textContent = pdf.numPages; })
         .catch(() => { row.querySelector('[data-pages]').textContent = '—'; });
     } else {
       row.querySelector('[data-pages]').textContent = '—';
     }
   }
-  return files.length;
 }
+notesSelectBtn.addEventListener('click', () => notesInput.click());
+notesInput.addEventListener('change', e => {
+  notesFiles = filesFromFileList(e.target.files, NOTES_EXTS, notesFiles);
+  renderNotes();
+  updateStatus();
+});
 
+/* ── rendering: LaTeX sources ── */
 const texRows = document.getElementById('tex-rows');
 const texEmpty = document.getElementById('tex-empty');
+const texSelectBtn = document.getElementById('tex-select-btn');
+const texInput = document.getElementById('tex-input');
 
-async function loadTex() {
-  const files = await resolveFiles(LATEX_DIR, LATEX_FILES, TEX_EXTS);
+function renderTex() {
   texRows.innerHTML = '';
-  texEmpty.style.display = files.length ? 'none' : 'block';
-  for (const f of files) {
-    const url = `${LATEX_DIR}/${encodeURIComponent(f.name)}`;
+  texEmpty.style.display = texFiles.length ? 'none' : 'block';
+  for (const f of texFiles) {
     const row = document.createElement('div');
     row.className = 'file-row sources';
     row.innerHTML = `
@@ -443,11 +455,16 @@ async function loadTex() {
       <div class="file-pages mono">${extOf(f.name)}</div>
       <div class="file-date mono">${timeAgo(f.modified)}</div>
       <div class="file-action"><button title="open"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 12L12 4M12 4H6M12 4V10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>`;
-    row.addEventListener('click', () => openTexFile(f, url));
+    row.addEventListener('click', () => openTexFile(f));
     texRows.appendChild(row);
   }
-  return files.length;
 }
+texSelectBtn.addEventListener('click', () => texInput.click());
+texInput.addEventListener('change', e => {
+  texFiles = filesFromFileList(e.target.files, TEX_EXTS, texFiles);
+  renderTex();
+  updateStatus();
+});
 
 /* ── viewer modal ── */
 const modal = document.getElementById('modal');
@@ -464,11 +481,11 @@ function openModalShell(title) {
   modalPrev.style.display = modalNext.style.display = 'none';
   modal.classList.add('open'); document.body.style.overflow = 'hidden'; activePdf = null;
 }
-async function openFile(f, kind, url) {
+async function openFile(f, kind) {
   openModalShell(f.name);
   if (kind === 'pdf') {
     try {
-      activePdf = await pdfjsLib.getDocument(url).promise;
+      activePdf = await pdfjsLib.getDocument(f.url).promise;
       const total = activePdf.numPages;
       modalPrev.style.display = modalNext.style.display = 'inline-block';
       modalPageInfo.textContent = '1 / ' + total;
@@ -490,20 +507,19 @@ async function openFile(f, kind, url) {
     } catch (e) { modalBody.innerHTML = '<p class="modal-empty">Could not open this file.</p>'; }
   } else if (kind === 'image') {
     const wrap = document.createElement('div'); wrap.className = 'modal-page-wrap';
-    wrap.innerHTML = `<img src="${url}" alt="${escapeHtml(f.name)}">`;
+    wrap.innerHTML = `<img src="${f.url}" alt="${escapeHtml(f.name)}">`;
     modalBody.appendChild(wrap);
   } else {
-    modalBody.innerHTML = `<p class="modal-empty">No preview for this format.<br><a class="mono" href="${url}" download="${escapeHtml(f.name)}">Download ${escapeHtml(f.name)}</a></p>`;
+    modalBody.innerHTML = `<p class="modal-empty">No preview for this format.<br><a class="mono" href="${f.url}" download="${escapeHtml(f.name)}">Download ${escapeHtml(f.name)}</a></p>`;
   }
 }
-async function openTexFile(f, url) {
+async function openTexFile(f) {
   openModalShell(f.name);
   try {
-    const res = await fetch(url);
-    const text = await res.text();
+    const text = await f.file.text();
     const pre = document.createElement('div'); pre.className = 'modal-source'; pre.textContent = text;
     modalBody.appendChild(pre);
-  } catch (e) { modalBody.innerHTML = '<p class="modal-empty">Could not load this file.</p>'; }
+  } catch (e) { modalBody.innerHTML = '<p class="modal-empty">Could not read this file.</p>'; }
 }
 function updatePageInfo() {
   if (!activePdf) return;
@@ -525,22 +541,24 @@ modalCloseBtn.addEventListener('click', closeModal);
 modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-/* ── status pill + refresh ── */
+/* ── status pill + footer ── */
 const statusPill = document.getElementById('status-pill');
 const statusText = document.getElementById('status-text');
 const footerNote = document.getElementById('footer-note');
 
-async function scanAll() {
-  statusText.textContent = 'scanning local folders…';
-  statusPill.classList.remove('live');
-  const [notesCount, texCount] = await Promise.all([loadNotes(), loadTex()]);
-  const total = notesCount + texCount;
-  statusPill.classList.add('live');
-  statusText.textContent = `${total} file${total === 1 ? '' : 's'} found locally`;
-  footerNote.textContent = `${notesCount} note${notesCount === 1 ? '' : 's'} · ${texCount} source${texCount === 1 ? '' : 's'} · read directly from notes/ and latex/`;
+function updateStatus() {
+  const total = notesFiles.length + texFiles.length;
+  if (total === 0) {
+    statusPill.classList.remove('live');
+    statusText.textContent = 'no folder loaded yet';
+    footerNote.textContent = 'nothing loaded yet — files stay on your device until you select a folder';
+  } else {
+    statusPill.classList.add('live');
+    statusText.textContent = `${total} file${total === 1 ? '' : 's'} loaded`;
+    footerNote.textContent = `${notesFiles.length} note${notesFiles.length === 1 ? '' : 's'} · ${texFiles.length} source${texFiles.length === 1 ? '' : 's'} · loaded from your device, nothing hosted`;
+  }
 }
-// Re-check periodically so metadata (size/date) stays fresh without a manual action.
-setInterval(scanAll, 30000);
+updateStatus();
 
 /* ── dynamic background: drifting formulas + Feynman diagrams ── */
 const bgCanvas = document.getElementById('bg-canvas');
@@ -630,9 +648,6 @@ document.addEventListener('visibilitychange', () => {
   else if (!reduceMotion && !bgAnim) { tick(); }
 });
 startBackground();
-
-/* ── boot ── */
-scanAll();
 </script>
 </body>
 </html>
